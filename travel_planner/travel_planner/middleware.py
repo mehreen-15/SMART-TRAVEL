@@ -1,208 +1,172 @@
-"""Middleware for monitoring and tracking SQLite database connections"""
-import uuid
-import sqlite3
-import datetime
-import os
+import time
+from django.utils import timezone
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import connection
-from .models import DatabaseConnectionLog, DatabaseStatus
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+import json
+import re
+import logging
 
-class SQLiteConnectionMiddleware:
+logger = logging.getLogger('db_performance')
+
+class UserActivityMiddleware:
     """
-    Middleware to track SQLite database connections and performance.
-    
-    This middleware:
-    1. Logs new database connections
-    2. Tracks query counts
-    3. Updates database status periodically
-    4. Provides performance monitoring for SQLite
+    Middleware to track user activity and broadcast updates
+    through WebSockets for real-time monitoring
     """
     
     def __init__(self, get_response):
         self.get_response = get_response
-        # Initialize tracker for query counts
-        self.query_tracker = {}
-        # Generate a connection ID that's unique per middleware instance
-        self.connection_id = str(uuid.uuid4())
-        # One-time configuration and initialization
-        self._update_db_status()
+        # Patterns to ignore in tracking
+        self.ignore_patterns = [
+            r'^/static/',
+            r'^/media/',
+            r'^/favicon\.ico$',
+            r'^/admin/jsi18n/',
+            r'^/__debug__/',
+        ]
     
     def __call__(self, request):
-        # Code to be executed for each request before the view is called
-        
-        # Generate a connection identifier for this request
-        request.db_connection_id = f"{self.connection_id}_{uuid.uuid4().hex[:8]}"
-        
-        # Store the initial query count for this request
-        initial_query_count = len(connection.queries)
+        # Start timing the request
+        start_time = time.time()
         
         # Process the request
         response = self.get_response(request)
         
-        # Code to be executed for each request after the view is called
-        if settings.DEBUG or getattr(settings, 'DATABASE_STATS_ENABLED', False):
-            self._log_connection(request, initial_query_count)
+        # Only track if the setting is enabled
+        if not getattr(settings, 'TRACK_USER_ACTIVITY', False):
+            return response
         
-        # Periodically update database status (every 50 requests)
-        if hasattr(self, '_request_counter'):
-            self._request_counter += 1
-            if self._request_counter % 50 == 0:
-                self._update_db_status()
-        else:
-            self._request_counter = 1
-            
+        # Skip tracking for ignored patterns
+        path = request.path
+        if any(re.match(pattern, path) for pattern in self.ignore_patterns):
+            return response
+        
+        # Only track authenticated users
+        if not request.user.is_authenticated:
+            return response
+        
+        # Calculate request processing time
+        processing_time = time.time() - start_time
+        
+        # Record user activity
+        self._record_activity(request, response, processing_time)
+        
         return response
     
-    def _log_connection(self, request, initial_query_count):
-        """Log information about the database connection for this request"""
+    def _record_activity(self, request, response, processing_time):
+        """Record user activity and send WebSocket updates"""
+        user = request.user
+        path = request.path
+        method = request.method
+        status_code = response.status_code
+        ip_address = self._get_client_ip(request)
+        
+        # Update UserProfile if it exists
         try:
-            # Get current query count
-            current_query_count = len(connection.queries)
-            query_count = current_query_count - initial_query_count
-            
-            # Calculate query time
-            query_time_ms = sum(
-                float(query.get('time', 0)) * 1000  # Convert to milliseconds
-                for query in connection.queries[initial_query_count:]
-            )
-            
-            # Get tables accessed (simple parsing, not exhaustive)
-            tables_accessed = set()
-            for query in connection.queries[initial_query_count:]:
-                sql = query.get('sql', '').lower()
-                
-                # Try to extract table names from FROM and JOIN clauses
-                if 'from' in sql:
-                    from_parts = sql.split('from')[1].split('where')[0].split(',')
-                    for part in from_parts:
-                        table = part.strip().split(' ')[0]
-                        if table:
-                            tables_accessed.add(table)
-                            
-                if 'join' in sql:
-                    join_parts = sql.split('join')
-                    for part in join_parts[1:]:
-                        table = part.strip().split(' ')[0]
-                        if table:
-                            tables_accessed.add(table)
-            
-            # Get SQLite-specific stats
-            cursor = connection.cursor()
-            cursor.execute("PRAGMA journal_mode;")
-            journal_mode = cursor.fetchone()[0]
-            
-            cursor.execute("PRAGMA page_size;")
-            page_size = cursor.fetchone()[0]
-            
-            cursor.execute("PRAGMA cache_size;")
-            cache_size = cursor.fetchone()[0]
-            
-            # Log the connection data
-            log_entry = DatabaseConnectionLog(
-                connection_id=request.db_connection_id,
-                user_agent=request.META.get('HTTP_USER_AGENT', ''),
-                ip_address=self._get_client_ip(request),
-                query_count=query_count,
-                query_time_ms=query_time_ms,
-                tables_accessed=','.join(tables_accessed),
-                journal_mode=journal_mode,
-                page_size=page_size,
-                cache_size=cache_size,
-                sqlite_version=sqlite3.sqlite_version
-            )
-            log_entry.save()
-            
-        except Exception as e:
-            # Log the error but don't crash the request
-            print(f"Error logging database connection: {e}")
-    
-    def _update_db_status(self):
-        """Update the database status information"""
+            from users.models import UserProfile
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile.last_login = timezone.now()
+            profile.last_activity = timezone.now()
+            profile.last_ip = ip_address
+            profile.save(update_fields=['last_login', 'last_activity', 'last_ip'])
+        except:
+            pass
+        
+        # Record to activity log if the model exists
         try:
-            cursor = connection.cursor()
-            
-            # Get SQLite version
-            cursor.execute("SELECT sqlite_version();")
-            version = cursor.fetchone()[0]
-            
-            # Get table count
-            cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table';")
-            table_count = cursor.fetchone()[0]
-            
-            # Get index count
-            cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='index';")
-            index_count = cursor.fetchone()[0]
-            
-            # Get database size
-            db_path = settings.DATABASES['default']['NAME']
-            size_bytes = os.path.getsize(db_path) if os.path.exists(db_path) else 0
-            
-            # Get SQLite configuration
-            cursor.execute("PRAGMA journal_mode;")
-            journal_mode = cursor.fetchone()[0]
-            
-            cursor.execute("PRAGMA synchronous;")
-            synchronous = cursor.fetchone()[0]
-            
-            cursor.execute("PRAGMA cache_size;")
-            cache_size = cursor.fetchone()[0]
-            
-            cursor.execute("PRAGMA page_size;")
-            page_size = cursor.fetchone()[0]
-            
-            # Get integrity check
-            cursor.execute("PRAGMA quick_check;")
-            integrity_check = cursor.fetchone()[0]
-            
-            # Try to get last vacuum time (not always available)
-            last_vacuum = None
-            try:
-                cursor.execute("PRAGMA last_vacuum;")
-                vacuum_result = cursor.fetchone()
-                if vacuum_result and vacuum_result[0]:
-                    last_vacuum = datetime.datetime.fromtimestamp(vacuum_result[0])
-            except:
-                pass
-            
-            # Update or create database status
-            status, created = DatabaseStatus.objects.get_or_create(
-                defaults={
-                    'version': version,
-                    'size_bytes': size_bytes,
-                    'table_count': table_count,
-                    'index_count': index_count,
-                    'journal_mode': journal_mode,
-                    'synchronous_setting': synchronous,
-                    'cache_size': cache_size, 
-                    'page_size': page_size,
-                    'last_vacuum': last_vacuum,
-                    'integrity_check': integrity_check
-                }
+            from users.models import UserActivity
+            UserActivity.objects.create(
+                user=user,
+                action=f"{method} {path}",
+                ip_address=ip_address,
+                response_code=status_code,
+                processing_time=processing_time,
+                user_agent=request.META.get('HTTP_USER_AGENT', '')
             )
-            
-            if not created:
-                status.version = version
-                status.size_bytes = size_bytes
-                status.table_count = table_count
-                status.index_count = index_count
-                status.journal_mode = journal_mode
-                status.synchronous_setting = synchronous
-                status.cache_size = cache_size
-                status.page_size = page_size
-                if last_vacuum:
-                    status.last_vacuum = last_vacuum
-                status.integrity_check = integrity_check
-                status.save()
-                
-        except Exception as e:
-            # Log the error but don't crash
-            print(f"Error updating database status: {e}")
+        except:
+            pass
+        
+        # Only send WebSocket updates for non-admin users or significant actions
+        if not (user.is_staff and path.startswith('/admin/')) or status_code >= 400:
+            self._send_activity_update(user, path, method, status_code)
     
     def _get_client_ip(self, request):
-        """Get the client IP address from the request"""
+        """Extract client IP address"""
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0]
-        else:
-            ip = request.META.get('REMOTE_ADDR')
-        return ip 
+            return x_forwarded_for.split(',')[0].strip()
+        return request.META.get('REMOTE_ADDR', '')
+    
+    def _send_activity_update(self, user, path, method, status_code):
+        """Send activity update through WebSocket channel"""
+        try:
+            channel_layer = get_channel_layer()
+            
+            # Send to admin channel
+            async_to_sync(channel_layer.group_send)(
+                'user_activity',
+                {
+                    'type': 'user_activity_update',
+                    'data': {
+                        'user_id': user.id,
+                        'username': user.username,
+                        'path': path,
+                        'method': method,
+                        'status_code': status_code,
+                        'timestamp': timezone.now().strftime('%Y-%m-%d %H:%M:%S'),
+                        'email': user.email
+                    }
+                }
+            )
+        except Exception as e:
+            # Just log the error but don't raise an exception
+            print(f"Error sending user activity update: {str(e)}")
+
+class DatabasePerformanceMiddleware:
+    """
+    Middleware to track database performance and query count
+    """
+    
+    def __init__(self, get_response):
+        self.get_response = get_response
+    
+    def __call__(self, request):
+        # Clear the queries list before the view
+        if settings.DEBUG:
+            reset_queries = hasattr(connection, 'reset_queries')
+            if reset_queries:
+                connection.reset_queries()
+            
+        # Time before the view is called
+        start = time.time()
+        
+        # Process the request
+        response = self.get_response(request)
+        
+        # Time after the view is called
+        duration = time.time() - start
+        
+        # Log database queries if debug is enabled and there are queries
+        if settings.DEBUG and hasattr(connection, 'queries'):
+            query_count = len(connection.queries)
+            if query_count > 0:
+                # Calculate total query time
+                query_time = sum(float(q.get('time', 0)) for q in connection.queries)
+                
+                # Log information about queries
+                if query_count > 10 or query_time > 0.5:  # Only log if significant
+                    logger.warning(
+                        f"Path: {request.path} - {query_count} queries in {query_time:.3f}s "
+                        f"(Total request: {duration:.3f}s)"
+                    )
+                    
+                    # Log slow queries
+                    for i, query in enumerate(connection.queries):
+                        q_time = float(query.get('time', 0))
+                        if q_time > 0.1:  # Log queries taking more than 100ms
+                            logger.warning(f"Slow query #{i}: {q_time:.3f}s - {query.get('sql', '')}")
+        
+        return response 

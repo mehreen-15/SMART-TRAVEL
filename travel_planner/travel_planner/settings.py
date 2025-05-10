@@ -43,8 +43,9 @@ INSTALLED_APPS = [
     'destinations',
     'bookings',
     'reviews',
-    # Add travel_planner as an app to include its models
-    'travel_planner',
+    # Third-party apps for real-time functionality
+    'channels',
+    'django_eventstream',
 ]
 
 MIDDLEWARE = [
@@ -55,8 +56,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # SQLite connection tracking middleware
-    'travel_planner.middleware.SQLiteConnectionMiddleware',
+    'users.middleware.UserActivityMiddleware',
+    'travel_planner.middleware.DatabasePerformanceMiddleware',
 ]
 
 ROOT_URLCONF = 'travel_planner.urls'
@@ -72,51 +73,46 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                # Custom context processor for database info
-                'travel_planner.context_processors.database_info',
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'travel_planner.wsgi.application'
+ASGI_APPLICATION = 'travel_planner.routing.application'
 
+# Channel layers for real-time functionality
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# SQLite Configuration
-# This is the production database for Smart Travel
+# SQLite configuration - commented out
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+# PostgreSQL configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        'CONN_MAX_AGE': 600,  # Keep connections alive for 10 minutes
-        'OPTIONS': {
-            'timeout': 20,  # Timeout in seconds
-            'check_same_thread': False,  # Allow multiple threads to use the same connection
-        },
-        'TEST': {
-            'NAME': BASE_DIR / 'test_db.sqlite3',  # Use separate test database
-        },
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'travel_planner',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',  # In production, use environment variables
+        'HOST': 'localhost',
+        'PORT': '5432',
+        'CONN_MAX_AGE': 60,      # Keep connections alive for 60 seconds
+        'OPTIONS': {'sslmode': 'prefer'},
     }
 }
 
-# Database connection stats to be displayed in the admin dashboard
-DATABASE_CONNECTION_POOLING = True
-DATABASE_STATS_ENABLED = True
-MAX_CONNECTIONS = 100
-
-# SQLite performance optimizations
-# These will be applied on application startup
-SQLITE_PRAGMAS = {
-    'journal_mode': 'wal',       # Write-Ahead Logging for better concurrent access
-    'synchronous': 1,            # Normal synchronization (balance of safety and speed)
-    'cache_size': -10000,        # 10MB cache size (negative value means KB)
-    'temp_store': 2,             # Store temp tables and indices in memory
-    'mmap_size': 30000000000,    # 30GB memory-mapped I/O (adjust based on available RAM)
-    'foreign_keys': 1,           # Enable foreign key constraints
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -155,3 +151,69 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Third-party API settings
 # Visual Crossing Weather API key
 VISUALCROSSING_WEATHER_API_KEY = 'L8F7FT8G6BFFSAUAPWFBZVL8B'
+
+# User activity tracking
+TRACK_USER_ACTIVITY = True
+USER_ACTIVITY_RETENTION_DAYS = 30  # How many days to keep user activity logs
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+        'db_performance': {
+            'format': '[DB] {asctime} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
+            'formatter': 'verbose',
+        },
+        'db_file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/db_performance.log'),
+            'formatter': 'db_performance',
+        },
+        'user_activity_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/user_activity.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'db_performance': {
+            'handlers': ['console', 'db_file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'user_activity': {
+            'handlers': ['console', 'user_activity_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
