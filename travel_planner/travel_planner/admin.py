@@ -3,7 +3,6 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User, Group
 from django.db.models import Count, Sum
 from django.utils.html import format_html
-from django.urls import reverse
 
 # Import your models
 from users.models import UserProfile, TravelPreference
@@ -64,53 +63,53 @@ class TravelPlannerAdminSite(AdminSite):
         # Get recent payments (last 5)
         recent_payments = PaymentTransaction.objects.order_by('-created_at')[:5]
         
-        # Generate quick links with correct URL patterns for our custom admin site
+        # Generate quick links using direct paths rather than URL reversals
         quick_links = [
             {
                 'name': 'Users',
-                'link': reverse('smarttravel_admin:auth_user_changelist'),
+                'link': '/admin/auth/user/',
                 'icon': 'fas fa-users',
                 'color': '#3498db'
             },
             {
                 'name': 'Destinations',
-                'link': reverse('smarttravel_admin:destinations_destination_changelist'),
+                'link': '/admin/destinations/destination/',
                 'icon': 'fas fa-map-marker-alt',
                 'color': '#2ecc71'
             },
             {
                 'name': 'Trips',
-                'link': reverse('smarttravel_admin:bookings_trip_changelist'),
+                'link': '/admin/bookings/trip/',
                 'icon': 'fas fa-suitcase',
                 'color': '#9b59b6'
             },
             {
                 'name': 'Hotel Bookings',
-                'link': reverse('smarttravel_admin:bookings_hotelbooking_changelist'),
+                'link': '/admin/bookings/hotelbooking/',
                 'icon': 'fas fa-hotel',
                 'color': '#f1c40f'
             },
             {
                 'name': 'Transportation',
-                'link': reverse('smarttravel_admin:bookings_transportation_changelist'),
+                'link': '/admin/bookings/transportation/',
                 'icon': 'fas fa-plane',
                 'color': '#e74c3c'
             },
             {
                 'name': 'Payments',
-                'link': reverse('smarttravel_admin:bookings_paymenttransaction_changelist'),
+                'link': '/admin/bookings/paymenttransaction/',
                 'icon': 'fas fa-credit-card',
                 'color': '#1abc9c'
             },
             {
                 'name': 'E-Tickets',
-                'link': reverse('smarttravel_admin:bookings_eticket_changelist'),
+                'link': '/admin/bookings/eticket/',
                 'icon': 'fas fa-ticket-alt',
                 'color': '#e67e22'
             },
             {
                 'name': 'Attractions',
-                'link': reverse('smarttravel_admin:destinations_attraction_changelist'),
+                'link': '/admin/destinations/attraction/',
                 'icon': 'fas fa-landmark',
                 'color': '#34495e'
             }
