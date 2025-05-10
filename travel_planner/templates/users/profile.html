@@ -1,0 +1,110 @@
+{% extends 'base/base.html' %}
+
+{% block title %}My Profile - Smart Travel{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="profile-header rounded bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    {% if user_profile.profile_picture %}
+                    <img src="{{ user_profile.profile_picture.url }}" alt="{{ user.username }}" class="profile-picture">
+                    {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&background=0D8ABC&color=fff&size=150" alt="{{ user.username }}" class="profile-picture">
+                    {% endif %}
+                </div>
+                <div class="col-md-9">
+                    <h1 class="mb-0">{{ user.get_full_name }}</h1>
+                    <p class="text-muted">@{{ user.username }}</p>
+                    <div class="mb-3">
+                        <p><i class="fas fa-envelope me-2"></i> {{ user.email }}</p>
+                        {% if user_profile.phone_number %}
+                        <p><i class="fas fa-phone me-2"></i> {{ user_profile.phone_number }}</p>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'users:edit_profile' %}" class="btn btn-primary"><i class="fas fa-edit me-1"></i> Edit Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">About Me</h5>
+                </div>
+                <div class="card-body">
+                    {% if user_profile.bio %}
+                    <p>{{ user_profile.bio }}</p>
+                    {% else %}
+                    <p class="text-muted">No bio information provided yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Reviews -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Reviews</h5>
+                </div>
+                <div class="card-body">
+                    <!-- This would be populated from the database -->
+                    <p class="text-muted">You haven't written any reviews yet.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Travel Preferences Card -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Travel Preferences</h5>
+                    <a href="{% url 'users:edit_preferences' %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>Destination Type:</strong>
+                            <span class="float-end">{{ travel_preferences.destination_type|default:"Not specified" }}</span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Budget:</strong>
+                            <span class="float-end">{{ travel_preferences.get_budget_preference_display|default:"Not specified" }}</span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Travel Style:</strong>
+                            <span class="float-end">{{ travel_preferences.get_travel_style_display|default:"Not specified" }}</span>
+                        </li>
+                        {% if travel_preferences.preferred_activities %}
+                        <li class="list-group-item">
+                            <strong>Preferred Activities:</strong>
+                            <p class="mb-0 mt-1">{{ travel_preferences.preferred_activities }}</p>
+                        </li>
+                        {% endif %}
+                        {% if travel_preferences.dietary_restrictions %}
+                        <li class="list-group-item">
+                            <strong>Dietary Restrictions:</strong>
+                            <p class="mb-0 mt-1">{{ travel_preferences.dietary_restrictions }}</p>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Upcoming Trips -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Upcoming Trips</h5>
+                </div>
+                <div class="card-body">
+                    <!-- This would be populated from the database -->
+                    <p class="text-muted">No upcoming trips planned.</p>
+                    <a href="{% url 'bookings:create_trip' %}" class="btn btn-primary btn-sm mt-2"><i class="fas fa-plus me-1"></i> Plan a Trip</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

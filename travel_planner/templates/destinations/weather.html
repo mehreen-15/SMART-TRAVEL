@@ -1,0 +1,135 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Weather for {{ destination.name }} - Smart Travel{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4">Weather for {{ destination.name }}</h1>
+            <h3 class="text-muted">{{ destination.city }}, {{ destination.country }}</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <img src="{{ destination.image_url }}" class="card-img-top" alt="{{ destination.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ destination.name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ destination.city }}, {{ destination.country }}</h6>
+                    <p class="card-text">{{ destination.description|truncatewords:30 }}</p>
+                    <a href="{% url 'destinations:detail' destination.id %}" class="btn btn-primary">
+                        <i class="fas fa-info-circle"></i> View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            {% if current_weather %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2 text-center">
+                            <img src="{{ current_weather.icon_url }}" alt="Weather icon" class="img-fluid" style="width: 80px;">
+                        </div>
+                        <div class="col-md-5">
+                            <h4>Current Weather</h4>
+                            <h2>{{ current_weather.temperature }}°C</h2>
+                            <p class="text-capitalize">{{ current_weather.description }}</p>
+                        </div>
+                        <div class="col-md-5 text-end">
+                            <h4>Details</h4>
+                            <p>Humidity: {{ current_weather.humidity }}%</p>
+                            <p>Wind: {{ current_weather.wind_speed }} m/s</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                Weather data is currently unavailable for this destination.
+            </div>
+            {% endif %}
+            
+            {% if forecast %}
+            <h3 class="mb-3">5-Day Forecast</h3>
+            <div class="row mb-4">
+                {% for day in forecast %}
+                <div class="col">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <p class="card-text fw-bold">{{ day.date }}</p>
+                            <img src="{{ day.icon_url }}" alt="Weather icon" class="img-fluid mx-auto d-block" style="width: 48px;">
+                            <h5 class="card-title">{{ day.temperature }}°C</h5>
+                            <p class="card-text text-capitalize small">{{ day.description }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title">Weather Tips for {{ destination.name }}</h3>
+                    <p>The best time to visit {{ destination.name }} is {{ destination.best_time_to_visit }}.</p>
+                    <p>The average temperature is around {{ destination.avg_temperature }}°C.</p>
+                    
+                    {% if current_weather.temperature < 10 %}
+                    <div class="alert alert-primary">
+                        <strong>Pack warm clothes!</strong> It's currently quite cold in {{ destination.city }}.
+                    </div>
+                    {% elif current_weather.temperature > 30 %}
+                    <div class="alert alert-warning">
+                        <strong>It's hot right now!</strong> Stay hydrated and don't forget sunscreen.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <strong>Great weather!</strong> It's a pleasant temperature for exploring {{ destination.name }}.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Weather-Based Activity Recommendations</h3>
+                    <ul class="list-group list-group-flush">
+                        {% if current_weather.description == 'clear sky' or current_weather.description == 'few clouds' %}
+                        <li class="list-group-item">Great day for outdoor attractions and sightseeing</li>
+                        {% if destination.attractions.all %}
+                            {% for attraction in destination.attractions.all %}
+                                {% if attraction.category == 'nature' or attraction.category == 'entertainment' %}
+                                <li class="list-group-item">Consider visiting <a href="{% url 'destinations:attraction_detail' attraction.id %}">{{ attraction.name }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        
+                        {% elif 'rain' in current_weather.description or 'shower' in current_weather.description %}
+                        <li class="list-group-item">Today might be better for indoor activities</li>
+                        {% if destination.attractions.all %}
+                            {% for attraction in destination.attractions.all %}
+                                {% if attraction.category == 'culture' or attraction.category == 'history' or attraction.category == 'food' %}
+                                <li class="list-group-item">Consider visiting <a href="{% url 'destinations:attraction_detail' attraction.id %}">{{ attraction.name }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        
+                        {% else %}
+                        <li class="list-group-item">Mix of indoor and outdoor activities would be ideal today</li>
+                        {% if destination.attractions.all %}
+                            {% for attraction in destination.attractions.all|slice:":3" %}
+                                <li class="list-group-item">Consider visiting <a href="{% url 'destinations:attraction_detail' attraction.id %}">{{ attraction.name }}</a></li>
+                            {% endfor %}
+                        {% endif %}
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

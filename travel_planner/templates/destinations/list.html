@@ -1,0 +1,235 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load destination_extras %}
+
+{% block title %}Explore Destinations - Smart Travel{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <div class="search-container position-relative">
+                <form method="get" action="{% url 'destinations:search' %}" class="d-flex">
+                    <input type="text" name="query" id="searchInput" class="form-control me-2" placeholder="Search destinations, cities, or countries..." aria-label="Search">
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                </form>
+                <div id="searchSuggestions" class="position-absolute w-100 mt-1 shadow-sm bg-white rounded" style="z-index: 1000; display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Filter Destinations</h5>
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="region" class="form-label">Region</label>
+                            <select class="form-select" id="region" name="region">
+                                <option value="">All Regions</option>
+                                <option value="europe" {% if selected_region == 'europe' %}selected{% endif %}>Europe</option>
+                                <option value="asia" {% if selected_region == 'asia' %}selected{% endif %}>Asia</option>
+                                <option value="north_america" {% if selected_region == 'north_america' %}selected{% endif %}>North America</option>
+                                <option value="south_america" {% if selected_region == 'south_america' %}selected{% endif %}>South America</option>
+                                <option value="africa" {% if selected_region == 'africa' %}selected{% endif %}>Africa</option>
+                                <option value="oceania" {% if selected_region == 'oceania' %}selected{% endif %}>Oceania</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="budget" class="form-label">Budget Level</label>
+                            <select class="form-select" id="budget" name="budget">
+                                <option value="">All Budgets</option>
+                                <option value="budget" {% if selected_budget == 'budget' %}selected{% endif %}>Budget</option>
+                                <option value="mid_range" {% if selected_budget == 'mid_range' %}selected{% endif %}>Mid-Range</option>
+                                <option value="luxury" {% if selected_budget == 'luxury' %}selected{% endif %}>Luxury</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="activity" class="form-label">Activity Type</label>
+                            <select class="form-select" id="activity" name="activity">
+                                <option value="">All Activities</option>
+                                <option value="beach" {% if selected_activity == 'beach' %}selected{% endif %}>Beach</option>
+                                <option value="mountain" {% if selected_activity == 'mountain' %}selected{% endif %}>Mountains</option>
+                                <option value="city" {% if selected_activity == 'city' %}selected{% endif %}>City Exploration</option>
+                                <option value="historical" {% if selected_activity == 'historical' %}selected{% endif %}>Historical Sites</option>
+                                <option value="food" {% if selected_activity == 'food' %}selected{% endif %}>Food & Culinary</option>
+                            </select>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                            <a href="{% url 'destinations:list' %}" class="btn btn-outline-secondary">Reset</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Filters Display -->
+    {% if filters_active %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Active Filters:</strong> 
+                        {% if selected_region %}
+                        <span class="badge bg-secondary me-2">Region: {{ selected_region|title }}</span>
+                        {% endif %}
+                        {% if selected_budget %}
+                        <span class="badge bg-secondary me-2">Budget: {{ selected_budget|title }}</span>
+                        {% endif %}
+                        {% if selected_activity %}
+                        <span class="badge bg-secondary me-2">Activity: {{ selected_activity|title }}</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'destinations:list' %}" class="btn btn-sm btn-outline-secondary">Clear All</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Destinations List -->
+    <h1 class="mb-4">Explore Destinations</h1>
+    
+    {% if destinations %}
+    <div class="row">
+        {% for destination in destinations %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if destination.image %}
+                <img src="{{ destination.image.url }}" class="card-img-top" alt="{{ destination.name }}" style="height: 220px; object-fit: cover;">
+                {% else %}
+                <img src="{{ destination.image_url }}" class="card-img-top" alt="{{ destination.name }}" style="height: 220px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ destination.name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ destination.city }}, {{ destination.country }}</h6>
+                    <p class="card-text">{{ destination.description|truncatewords:20 }}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-info me-1"><i class="fas fa-thermometer-half"></i> {{ destination.avg_temperature|floatformat:1 }}°C</span>
+                            <span class="badge bg-warning"><i class="fas fa-star"></i> {{ destination.popularity_score|floatformat:1 }}</span>
+                        </div>
+                        <a href="{% url 'destinations:detail' destination.id %}" class="btn btn-primary">Explore</a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small>Best time to visit: {{ destination.best_time_to_visit }}</small>
+                        <a href="{% url 'destinations:weather' destination.id %}" class="btn btn-sm btn-info">
+                            <i class="fas fa-cloud"></i> Weather
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        {% if filters_active %}
+        No destinations found matching your filter criteria. Try adjusting your filters or <a href="{% url 'destinations:list' %}">view all destinations</a>.
+        {% else %}
+        No destinations found. Check back soon for more travel options!
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const suggestionsContainer = document.getElementById('searchSuggestions');
+        let searchTimeout = null;
+        
+        // Function to fetch search suggestions
+        function fetchSuggestions(query) {
+            if (query.length < 2) {
+                suggestionsContainer.style.display = 'none';
+                return;
+            }
+            
+            fetch(`/destinations/api/search-suggestions/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // Display suggestions
+                        suggestionsContainer.innerHTML = '';
+                        
+                        data.forEach(suggestion => {
+                            const suggestionItem = document.createElement('div');
+                            suggestionItem.className = 'p-2 border-bottom suggestion-item';
+                            suggestionItem.style.cursor = 'pointer';
+                            
+                            // Create the suggestion content with image
+                            suggestionItem.innerHTML = `
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0 me-2">
+                                        <img src="${suggestion.image}" alt="" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                                    </div>
+                                    <div>
+                                        <div>${suggestion.text}</div>
+                                        <small class="text-muted">${suggestion.type}</small>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            // Add click event to navigate
+                            suggestionItem.addEventListener('click', function() {
+                                window.location.href = suggestion.url;
+                            });
+                            
+                            suggestionsContainer.appendChild(suggestionItem);
+                        });
+                        
+                        suggestionsContainer.style.display = 'block';
+                    } else {
+                        suggestionsContainer.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching suggestions:', error);
+                    suggestionsContainer.style.display = 'none';
+                });
+        }
+        
+        // Add input event for search suggestions
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            // Clear existing timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            
+            // Set a timeout to avoid too many requests
+            searchTimeout = setTimeout(() => {
+                fetchSuggestions(query);
+            }, 300);
+        });
+        
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!searchInput.contains(event.target) && !suggestionsContainer.contains(event.target)) {
+                suggestionsContainer.style.display = 'none';
+            }
+        });
+        
+        // Show suggestions when focusing on input if there's already a value
+        searchInput.addEventListener('focus', function() {
+            const query = this.value.trim();
+            if (query.length >= 2) {
+                fetchSuggestions(query);
+            }
+        });
+    });
+</script>
+{% endblock %} 

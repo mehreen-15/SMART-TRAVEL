@@ -1,0 +1,205 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load destination_extras %}
+
+{% block title %}Search Results - Smart Travel{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <div class="search-container position-relative">
+                <form method="get" action="{% url 'destinations:search' %}" class="d-flex">
+                    <input type="text" name="q" id="searchInput" class="form-control me-2" placeholder="Search destinations, cities, or countries..." value="{{ query }}" aria-label="Search">
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                </form>
+                <div id="searchSuggestions" class="position-absolute w-100 mt-1 shadow-sm bg-white rounded" style="z-index: 1000; display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        {% if query %}
+                            <i class="fas fa-search me-2"></i>Search Results for "{{ query }}"
+                        {% else %}
+                            <i class="fas fa-search me-2"></i>All Destinations
+                        {% endif %}
+                    </h5>
+                    <p class="text-muted">{{ total_results }} result{% if total_results != 1 %}s{% endif %} found</p>
+                    
+                    {% if error_message %}
+                    <div class="alert alert-danger mt-3">
+                        {{ error_message }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if destinations %}
+                    <div class="list-group mt-3">
+                        {% for destination in destinations %}
+                        <a href="{% url 'destinations:detail' destination.id %}" class="list-group-item list-group-item-action">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <img src="{{ destination.image_url }}" alt="{{ destination.name }}" class="img-fluid rounded" style="height: 80px; object-fit: cover;">
+                                </div>
+                                <div class="col-md-10">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-1">{{ destination.name }}</h5>
+                                        <div>
+                                            <span class="badge bg-info me-1"><i class="fas fa-thermometer-half"></i> {{ destination.avg_temperature|floatformat:1 }}°C</span>
+                                            <span class="badge bg-warning"><i class="fas fa-star"></i> {{ destination.popularity_score|floatformat:1 }}</span>
+                                        </div>
+                                    </div>
+                                    <p class="mb-1 text-muted">{{ destination.city }}, {{ destination.country }}</p>
+                                    <p class="mb-1">{{ destination.description|truncatewords:25 }}</p>
+                                    <small class="text-muted">Best time to visit: {{ destination.best_time_to_visit }}</small>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info mt-3">
+                        {% if query %}
+                        No destinations found matching "{{ query }}". Try a different search term or browse our <a href="{% url 'destinations:list' %}">destinations directory</a>.
+                        {% else %}
+                        Start by searching for a destination, city, or country above.
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% if destinations %}
+                <div class="card-footer">
+                    <a href="{% url 'destinations:list' %}" class="btn btn-outline-primary"><i class="fas fa-th me-1"></i> View All Destinations</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Searches -->
+    {% if query and destinations %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">You might also be interested in...</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'destinations:list' %}?region=europe" class="btn btn-outline-secondary btn-sm d-block">Europe</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'destinations:list' %}?region=asia" class="btn btn-outline-secondary btn-sm d-block">Asia</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'destinations:list' %}?region=north_america" class="btn btn-outline-secondary btn-sm d-block">North America</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'destinations:list' %}?region=africa" class="btn btn-outline-secondary btn-sm d-block">Africa</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const suggestionsContainer = document.getElementById('searchSuggestions');
+        let searchTimeout = null;
+        
+        // Function to fetch search suggestions
+        function fetchSuggestions(query) {
+            if (query.length < 2) {
+                suggestionsContainer.style.display = 'none';
+                return;
+            }
+            
+            fetch(`/destinations/api/search-suggestions/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // Display suggestions
+                        suggestionsContainer.innerHTML = '';
+                        
+                        data.forEach(suggestion => {
+                            const suggestionItem = document.createElement('div');
+                            suggestionItem.className = 'p-2 border-bottom suggestion-item';
+                            suggestionItem.style.cursor = 'pointer';
+                            
+                            // Create the suggestion content with image
+                            suggestionItem.innerHTML = `
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0 me-2">
+                                        <img src="${suggestion.image}" alt="" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                                    </div>
+                                    <div>
+                                        <div>${suggestion.text}</div>
+                                        <small class="text-muted">${suggestion.type}</small>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            // Add click event to navigate
+                            suggestionItem.addEventListener('click', function() {
+                                window.location.href = suggestion.url;
+                            });
+                            
+                            suggestionsContainer.appendChild(suggestionItem);
+                        });
+                        
+                        suggestionsContainer.style.display = 'block';
+                    } else {
+                        suggestionsContainer.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching suggestions:', error);
+                    suggestionsContainer.style.display = 'none';
+                });
+        }
+        
+        // Add input event for search suggestions
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            // Clear existing timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            
+            // Set a timeout to avoid too many requests
+            searchTimeout = setTimeout(() => {
+                fetchSuggestions(query);
+            }, 300);
+        });
+        
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!searchInput.contains(event.target) && !suggestionsContainer.contains(event.target)) {
+                suggestionsContainer.style.display = 'none';
+            }
+        });
+        
+        // Show suggestions when focusing on input if there's already a value
+        searchInput.addEventListener('focus', function() {
+            const query = this.value.trim();
+            if (query.length >= 2) {
+                fetchSuggestions(query);
+            }
+        });
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,202 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Smart Travel - Plan Your Perfect Trip{% endblock %}
+
+{% block content %}
+<div class="hero-section mb-5 py-5 bg-primary text-white text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-4">Plan Your Dream Trip</h1>
+        <p class="lead mb-4">Discover personalized travel recommendations based on your preferences and budget</p>
+        <div class="d-flex justify-content-center">
+            <a href="/destinations/" class="btn btn-light btn-lg me-3">Explore Destinations</a>
+            <a href="/trips/create/" class="btn btn-outline-light btn-lg">Plan a Trip</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Features Section -->
+    <section class="features mb-5">
+        <h2 class="text-center mb-4">Why Choose Smart Travel</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="icon-box mb-3">
+                            <i class="fas fa-map-marked-alt fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Personalized Recommendations</h5>
+                        <p class="card-text">Get travel suggestions based on your preferences, budget, and travel style.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="icon-box mb-3">
+                            <i class="fas fa-calendar-alt fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Smart Itinerary Planning</h5>
+                        <p class="card-text">Create detailed day-by-day itineraries with attractions, activities, and reservations.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="icon-box mb-3">
+                            <i class="fas fa-cloud-sun fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Real-Time Updates</h5>
+                        <p class="card-text">Stay informed with weather forecasts and travel conditions for your destinations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Destinations -->
+    <section class="popular-destinations mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Popular Destinations</h2>
+            <a href="{% url 'destinations:list' %}" class="btn btn-outline-primary">View All</a>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200" class="card-img-top" alt="Paris" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">Paris, France</h5>
+                        <p class="card-text">Experience the romance and charm of the City of Light.</p>
+                    </div>
+                    <div class="card-footer bg-white border-0">
+                        <a href="{% url 'destinations:detail' 1 %}" class="btn btn-outline-primary btn-sm">Explore Paris</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <img src="https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200" class="card-img-top" alt="Santorini" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">Santorini, Greece</h5>
+                        <p class="card-text">Enjoy the stunning views of the blue-domed churches and Aegean Sea.</p>
+                    </div>
+                    <div class="card-footer bg-white border-0">
+                        <a href="{% url 'destinations:detail' 2 %}" class="btn btn-outline-primary btn-sm">Explore Santorini</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <img src="https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200" class="card-img-top" alt="Grand Canyon" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">Grand Canyon, USA</h5>
+                        <p class="card-text">Witness the breathtaking natural wonder of the world.</p>
+                    </div>
+                    <div class="card-footer bg-white border-0">
+                        <a href="{% url 'destinations:detail' 3 %}" class="btn btn-outline-primary btn-sm">Explore Grand Canyon</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200" class="card-img-top" alt="Kyoto" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">Kyoto, Japan</h5>
+                        <p class="card-text">Discover ancient temples and the beautiful Cherry Blossom season.</p>
+                    </div>
+                    <div class="card-footer bg-white border-0">
+                        <a href="{% url 'destinations:detail' 4 %}" class="btn btn-outline-primary btn-sm">Explore Kyoto</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials mb-5 py-5 bg-light rounded">
+        <div class="container">
+            <h2 class="text-center mb-4">What Our Travelers Say</h2>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 border-0">
+                        <div class="card-body">
+                            <div class="star-rating mb-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="card-text">"Smart Travel made planning our honeymoon so easy! The personalized recommendations were spot on, and we had the trip of a lifetime."</p>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <img src="{% static 'img/placeholder_destination.jpg' %}" class="rounded-circle" width="50" alt="Sarah J.">
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0">Sarah J.</h6>
+                                    <small class="text-muted">Bali Trip, 2023</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 border-0">
+                        <div class="card-body">
+                            <div class="star-rating mb-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <p class="card-text">"I travel for business frequently, and this app has transformed how I manage my trips. The real-time updates saved me during a storm in Chicago."</p>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <img src="{% static 'img/placeholder_destination.jpg' %}" class="rounded-circle" width="50" alt="Michael T.">
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0">Michael T.</h6>
+                                    <small class="text-muted">Business Traveler</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 border-0">
+                        <div class="card-body">
+                            <div class="star-rating mb-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="card-text">"As a solo female traveler, I appreciated the safety tips and community reviews. Found amazing hidden gems I would have missed otherwise!"</p>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <img src="{% static 'img/placeholder_destination.jpg' %}" class="rounded-circle" width="50" alt="Elena R.">
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0">Elena R.</h6>
+                                    <small class="text-muted">Southeast Asia Tour</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta text-center py-5 mb-5">
+        <h2 class="mb-3">Ready to Start Your Adventure?</h2>
+        <p class="lead mb-4">Join thousands of happy travelers who plan their perfect trips with Smart Travel</p>
+        <a href="/register/" class="btn btn-primary btn-lg px-5">Sign Up Now</a>
+    </section>
+</div>
+{% endblock %} 

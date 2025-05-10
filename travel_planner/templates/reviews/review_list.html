@@ -1,0 +1,218 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}My Reviews - Smart Travel{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <h2 class="mb-4">My Reviews</h2>
+            
+            <ul class="nav nav-tabs mb-4" id="reviewTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="destinations-tab" data-bs-toggle="tab" data-bs-target="#destinations" type="button" role="tab" aria-controls="destinations" aria-selected="true">
+                        Destinations <span class="badge bg-primary">{{ destination_reviews.count }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="accommodations-tab" data-bs-toggle="tab" data-bs-target="#accommodations" type="button" role="tab" aria-controls="accommodations" aria-selected="false">
+                        Accommodations <span class="badge bg-primary">{{ accommodation_reviews.count }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="attractions-tab" data-bs-toggle="tab" data-bs-target="#attractions" type="button" role="tab" aria-controls="attractions" aria-selected="false">
+                        Attractions <span class="badge bg-primary">{{ attraction_reviews.count }}</span>
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="reviewTabsContent">
+                <!-- Destination Reviews -->
+                <div class="tab-pane fade show active" id="destinations" role="tabpanel" aria-labelledby="destinations-tab">
+                    {% if destination_reviews %}
+                        <div class="row">
+                            {% for review in destination_reviews %}
+                                <div class="col-md-6 mb-4">
+                                    <div class="card shadow-sm h-100">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">{{ review.destination.name }}</h5>
+                                            <div class="d-flex">
+                                                <span class="badge bg-warning text-dark me-2">{{ review.rating }}/5</span>
+                                                <span class="text-muted small">{{ review.created_at|date:"M d, Y" }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3 d-flex">
+                                                <div class="flex-shrink-0 me-3">
+                                                    {% if review.destination.image %}
+                                                    <img src="{{ review.destination.image.url }}" alt="{{ review.destination.name }}" class="img-fluid rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                                    {% else %}
+                                                    <img src="{% static 'img/placeholder_destination.jpg' %}" alt="{{ review.destination.name }}" class="img-fluid rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                                    {% endif %}
+                                                </div>
+                                                <div>
+                                                    <p class="text-muted mb-1">{{ review.destination.city }}, {{ review.destination.country }}</p>
+                                                    <div class="small mb-1">
+                                                        <span class="text-muted">Weather: </span>
+                                                        <span class="badge bg-info text-dark">{{ review.weather_rating }}/5</span>
+                                                    </div>
+                                                    <div class="small">
+                                                        <span class="text-muted">Safety: </span>
+                                                        <span class="badge bg-info text-dark">{{ review.safety_rating }}/5</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p class="card-text">{{ review.comment }}</p>
+                                        </div>
+                                        <div class="card-footer bg-transparent d-flex justify-content-end">
+                                            <a href="{% url 'reviews:edit_review' review_type='destination' review_id=review.id %}" class="btn btn-sm btn-outline-primary me-2">Edit</a>
+                                            <a href="{% url 'reviews:delete_review' review_type='destination' review_id=review.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this review?')">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p class="mb-0">You haven't reviewed any destinations yet.</p>
+                            <p class="mb-0">
+                                <a href="{% url 'destinations:list' %}" class="alert-link">Explore destinations</a> to start sharing your experiences.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Accommodation Reviews -->
+                <div class="tab-pane fade" id="accommodations" role="tabpanel" aria-labelledby="accommodations-tab">
+                    {% if accommodation_reviews %}
+                        <div class="row">
+                            {% for review in accommodation_reviews %}
+                                <div class="col-md-6 mb-4">
+                                    <div class="card shadow-sm h-100">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">{{ review.accommodation.name }}</h5>
+                                            <div class="d-flex">
+                                                <span class="badge bg-warning text-dark me-2">{{ review.rating }}/5</span>
+                                                <span class="text-muted small">{{ review.created_at|date:"M d, Y" }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3 d-flex">
+                                                <div class="flex-shrink-0 me-3">
+                                                    {% if review.accommodation.image %}
+                                                    <img src="{{ review.accommodation.image.url }}" alt="{{ review.accommodation.name }}" class="img-fluid rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                                    {% else %}
+                                                    <img src="{% static 'img/placeholder_accommodation.jpg' %}" alt="{{ review.accommodation.name }}" class="img-fluid rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                                    {% endif %}
+                                                </div>
+                                                <div>
+                                                    <p class="text-muted mb-1">{{ review.accommodation.destination.name }}</p>
+                                                    <div class="small mb-1 d-flex">
+                                                        <div class="me-2">
+                                                            <span class="text-muted">Cleanliness: </span>
+                                                            <span class="badge bg-info text-dark">{{ review.cleanliness_rating }}/5</span>
+                                                        </div>
+                                                        <div>
+                                                            <span class="text-muted">Service: </span>
+                                                            <span class="badge bg-info text-dark">{{ review.service_rating }}/5</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="small">
+                                                        <span class="text-muted">Value: </span>
+                                                        <span class="badge bg-info text-dark">{{ review.value_rating }}/5</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p class="card-text">{{ review.comment }}</p>
+                                        </div>
+                                        <div class="card-footer bg-transparent d-flex justify-content-end">
+                                            <a href="{% url 'reviews:edit_review' review_type='accommodation' review_id=review.id %}" class="btn btn-sm btn-outline-primary me-2">Edit</a>
+                                            <a href="{% url 'reviews:delete_review' review_type='accommodation' review_id=review.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this review?')">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p class="mb-0">You haven't reviewed any accommodations yet.</p>
+                            <p class="mb-0">
+                                <a href="{% url 'destinations:list' %}" class="alert-link">Explore destinations</a> to find accommodations and share your experiences.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Attraction Reviews -->
+                <div class="tab-pane fade" id="attractions" role="tabpanel" aria-labelledby="attractions-tab">
+                    {% if attraction_reviews %}
+                        <div class="row">
+                            {% for review in attraction_reviews %}
+                                <div class="col-md-6 mb-4">
+                                    <div class="card shadow-sm h-100">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">{{ review.attraction.name }}</h5>
+                                            <div class="d-flex">
+                                                <span class="badge bg-warning text-dark me-2">{{ review.rating }}/5</span>
+                                                <span class="text-muted small">{{ review.created_at|date:"M d, Y" }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3 d-flex">
+                                                <div class="flex-shrink-0 me-3">
+                                                    {% if review.attraction.image %}
+                                                    <img src="{{ review.attraction.image.url }}" alt="{{ review.attraction.name }}" class="img-fluid rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                                    {% else %}
+                                                    <img src="{% static 'img/placeholder_attraction.jpg' %}" alt="{{ review.attraction.name }}" class="img-fluid rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                                    {% endif %}
+                                                </div>
+                                                <div>
+                                                    <p class="text-muted mb-1">{{ review.attraction.destination.name }}</p>
+                                                    <p class="text-muted small mb-1">{{ review.attraction.get_attraction_type_display }}</p>
+                                                    <div class="small">
+                                                        <span class="text-muted">Value for Money: </span>
+                                                        <span class="badge bg-info text-dark">{{ review.value_for_money }}/5</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p class="card-text">{{ review.comment }}</p>
+                                        </div>
+                                        <div class="card-footer bg-transparent d-flex justify-content-end">
+                                            <a href="{% url 'reviews:edit_review' review_type='attraction' review_id=review.id %}" class="btn btn-sm btn-outline-primary me-2">Edit</a>
+                                            <a href="{% url 'reviews:delete_review' review_type='attraction' review_id=review.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this review?')">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p class="mb-0">You haven't reviewed any attractions yet.</p>
+                            <p class="mb-0">
+                                <a href="{% url 'destinations:list' %}" class="alert-link">Explore destinations</a> to find attractions and share your experiences.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Bootstrap tabs
+        var triggerTabList = [].slice.call(document.querySelectorAll('#reviewTabs button'));
+        triggerTabList.forEach(function(triggerEl) {
+            var tabTrigger = new bootstrap.Tab(triggerEl);
+            triggerEl.addEventListener('click', function(event) {
+                event.preventDefault();
+                tabTrigger.show();
+            });
+        });
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,420 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ destination.name }} - Smart Travel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .text-shadow {
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    .destination-header {
+        height: 350px;
+        overflow: hidden;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        margin-top: -1.5rem;
+        position: relative;
+    }
+    .card-hover:hover {
+        transform: translateY(-5px);
+        transition: transform 0.3s ease;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .header-overlay {
+        background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 100%);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+    .badge-large {
+        font-size: 0.9rem;
+        padding: 8px 15px;
+    }
+    .destination-stats {
+        background-color: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 10px 15px;
+        backdrop-filter: blur(5px);
+        display: inline-block;
+        margin-top: 15px;
+    }
+    .btn-header {
+        padding: 12px 25px;
+        font-weight: 600;
+        border-radius: 30px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+    }
+    .btn-header:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Enhanced Destination Header -->
+    <div class="destination-header mb-5">
+        <div style="background: url('{{ destination.image_url }}') no-repeat center; background-size: cover; width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div>
+        <div class="header-overlay"></div>
+        <div class="container py-5 text-white header-content">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <span class="badge bg-primary mb-2">{{ destination.country }}</span>
+                    <h1 class="display-4 fw-bold text-shadow mb-2">{{ destination.name }}</h1>
+                    <h3 class="text-white-50 text-shadow mb-3">{{ destination.city }}</h3>
+                    
+                    <div class="destination-stats">
+                        <div class="row g-3">
+                            <div class="col-auto">
+                                <span class="badge-large bg-info d-flex align-items-center">
+                                    <i class="fas fa-thermometer-half me-2"></i> {{ destination.avg_temperature|floatformat:1 }}°C
+                                </span>
+                            </div>
+                            <div class="col-auto">
+                                <span class="badge-large bg-warning d-flex align-items-center">
+                                    <i class="fas fa-star me-2"></i> {{ destination.popularity_score|floatformat:1 }} Rating
+                                </span>
+                            </div>
+                            <div class="col-auto">
+                                <span class="badge-large bg-success d-flex align-items-center">
+                                    <i class="fas fa-calendar-alt me-2"></i> {{ destination.best_time_to_visit }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'bookings:create_trip' %}?destination={{ destination.id }}" class="btn btn-primary btn-lg shadow btn-header">
+                        <i class="fas fa-plane-departure me-2"></i>Plan Your Trip
+                    </a>
+                    {% else %}
+                    <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg shadow btn-header">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login to Plan
+                    </a>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <a href="#attractions" class="btn btn-sm btn-light me-2">
+                            <i class="fas fa-map-marker-alt me-1"></i> Attractions
+                        </a>
+                        <a href="#accommodations" class="btn btn-sm btn-light me-2">
+                            <i class="fas fa-bed me-1"></i> Accommodations
+                        </a>
+                        <a href="#reviews" class="btn btn-sm btn-light">
+                            <i class="fas fa-star me-1"></i> Reviews
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Destination Image and Description -->
+    <div class="row mb-5">
+        <div class="col-md-6">
+            {% if destination.image %}
+            <img src="{{ destination.image.url }}" alt="{{ destination.name }}" class="img-fluid rounded shadow-sm" style="width: 100%; height: 400px; object-fit: cover;">
+            {% else %}
+            <img src="{{ destination.image_url }}" alt="{{ destination.name }}" class="img-fluid rounded shadow-sm" style="width: 100%; height: 400px; object-fit: cover;">
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h4>About {{ destination.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">{{ destination.description }}</p>
+                    
+                    {% if user.is_authenticated %}
+                    <div class="mt-4">
+                        <a href="{% url 'reviews:add_destination_review' destination.id %}" class="btn btn-outline-primary"><i class="fas fa-edit me-2"></i>Write a Review</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weather and Best Time to Visit -->
+    <div class="card mb-5">
+        <div class="card-header bg-light">
+            <h4 class="mb-0"><i class="fas fa-cloud me-2"></i>Climate and Weather</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-thermometer-half me-2"></i>Climate</h5>
+                    <p>The average temperature at {{ destination.name }} is {{ destination.avg_temperature|floatformat:1 }}°C. Weather conditions can vary throughout the year.</p>
+                    
+                    <h5 class="mt-3"><i class="fas fa-calendar-alt me-2"></i>Best Time to Visit</h5>
+                    <p>The recommended time to visit {{ destination.name }} is during {{ destination.best_time_to_visit }} when the weather is most pleasant and tourist attractions are less crowded.</p>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Current Weather in {{ destination.city }}</h5>
+                            <div id="weather-loading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="text-muted mt-2">Loading current weather data...</p>
+                            </div>
+                            <div id="weather-content" style="display: none;">
+                                <img id="weather-icon" src="" alt="Weather icon" class="mb-2" style="width: 50px;">
+                                <h2 id="weather-temp" class="mb-1">--°C</h2>
+                                <p id="weather-desc" class="mb-3">--</p>
+                                <div class="row justify-content-center mb-3">
+                                    <div class="col-5">
+                                        <div class="border-end">
+                                            <p class="text-muted mb-0">Humidity</p>
+                                            <p id="weather-humidity" class="mb-0">--%</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-5">
+                                        <p class="text-muted mb-0">Wind</p>
+                                        <p id="weather-wind" class="mb-0">-- m/s</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="weather-error" style="display: none;">
+                                <div class="alert alert-warning mb-0">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    Weather data currently unavailable
+                                </div>
+                            </div>
+                            <a href="{% url 'destinations:weather' destination.id %}" class="btn btn-info mt-3">
+                                <i class="fas fa-cloud-sun me-2"></i>View Detailed Forecast
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attractions -->
+    <section id="attractions" class="mb-5 pt-3">
+        <h2 class="mb-4">Attractions <small class="text-muted">({{ attractions|length }} total)</small></h2>
+        
+        <div class="mb-4">
+            <ul class="nav nav-pills mb-3" id="attractions-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="all-attractions-tab" data-bs-toggle="pill" data-bs-target="#all-attractions" type="button" role="tab" aria-controls="all-attractions" aria-selected="true">All</button>
+                </li>
+                {% for category, attractions_list in attraction_categories.items %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="{{ category|slugify }}-tab" data-bs-toggle="pill" data-bs-target="#{{ category|slugify }}" type="button" role="tab" aria-controls="{{ category|slugify }}" aria-selected="false">{{ category }}</button>
+                </li>
+                {% endfor %}
+            </ul>
+            
+            <div class="tab-content" id="attractions-tabContent">
+                <div class="tab-pane fade show active" id="all-attractions" role="tabpanel" aria-labelledby="all-attractions-tab">
+                    <div class="row">
+                        {% for attraction in attractions %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 card-hover shadow-sm">
+                                {% if attraction.image %}
+                                <img src="{{ attraction.image.url }}" class="card-img-top" alt="{{ attraction.name }}" style="height: 180px; object-fit: cover;">
+                                {% else %}
+                                <img src="{{ attraction.image_url }}" class="card-img-top" alt="{{ attraction.name }}" style="height: 180px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ attraction.name }}</h5>
+                                    <span class="badge bg-secondary mb-2">{{ attraction.get_category_display }}</span>
+                                    <p class="card-text">{{ attraction.description|truncatewords:15 }}</p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">{{ attraction.opening_hours }}</small>
+                                        <a href="{% url 'destinations:attraction_detail' attraction.id %}" class="btn btn-sm btn-outline-primary">Details</a>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <small class="text-muted">
+                                        {% if attraction.entrance_fee %}
+                                        Entrance Fee: ${{ attraction.entrance_fee }}
+                                        {% else %}
+                                        Free Entrance
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                {% for category, attractions_list in attraction_categories.items %}
+                <div class="tab-pane fade" id="{{ category|slugify }}" role="tabpanel" aria-labelledby="{{ category|slugify }}-tab">
+                    <div class="row">
+                        {% for attraction in attractions_list %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 card-hover shadow-sm">
+                                {% if attraction.image %}
+                                <img src="{{ attraction.image.url }}" class="card-img-top" alt="{{ attraction.name }}" style="height: 180px; object-fit: cover;">
+                                {% else %}
+                                <img src="{{ attraction.image_url }}" class="card-img-top" alt="{{ attraction.name }}" style="height: 180px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ attraction.name }}</h5>
+                                    <p class="card-text">{{ attraction.description|truncatewords:15 }}</p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">{{ attraction.opening_hours }}</small>
+                                        <a href="{% url 'destinations:attraction_detail' attraction.id %}" class="btn btn-sm btn-outline-primary">Details</a>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <small class="text-muted">
+                                        {% if attraction.entrance_fee %}
+                                        Entrance Fee: ${{ attraction.entrance_fee }}
+                                        {% else %}
+                                        Free Entrance
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Accommodations -->
+    <section id="accommodations" class="mb-5 pt-3">
+        <h2 class="mb-4">Places to Stay <small class="text-muted">({{ accommodations|length }} options)</small></h2>
+        <div class="row">
+            {% for accommodation in accommodations %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 card-hover shadow-sm">
+                    {% if accommodation.image %}
+                    <img src="{{ accommodation.image.url }}" class="card-img-top" alt="{{ accommodation.name }}" style="height: 180px; object-fit: cover;">
+                    {% else %}
+                    <img src="{{ accommodation.image_url }}" class="card-img-top" alt="{{ accommodation.name }}" style="height: 180px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ accommodation.name }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ accommodation.get_type_display }}</h6>
+                        
+                        <div class="mb-3">
+                            <p class="mb-1"><i class="fas fa-map-marker-alt me-2"></i> {{ accommodation.address }}</p>
+                            <p class="mb-0">
+                                <i class="fas fa-star text-warning me-1"></i>
+                                <strong>{{ accommodation.rating|floatformat:1 }}</strong>/5
+                            </p>
+                        </div>
+                        
+                        <p class="card-text"><strong>Amenities:</strong> {{ accommodation.amenities }}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                            <div class="price">
+                                <strong>${{ accommodation.price_per_night }}</strong> / night
+                            </div>
+                            <a href="{% url 'destinations:accommodation_detail' accommodation.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Reviews -->
+    <section id="reviews" class="mb-5 pt-3">
+        <h2 class="mb-4">Traveler Reviews</h2>
+        <div class="card">
+            <div class="card-body">
+                {% if destination.reviews.all %}
+                <div class="review-list">
+                    {% for review in destination.reviews.all %}
+                    <div class="review-item mb-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="avatar me-3">
+                                <img src="https://ui-avatars.com/api/?name={{ review.user.first_name }}+{{ review.user.last_name }}&background=0D8ABC&color=fff&size=40" alt="{{ review.user.username }}" class="rounded-circle">
+                            </div>
+                            <div>
+                                <h5 class="mb-0">{{ review.user.get_full_name }}</h5>
+                                <div class="text-muted small">{{ review.created_at|date:"F d, Y" }}</div>
+                            </div>
+                            <div class="ms-auto">
+                                <span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>{{ review.rating }}/5</span>
+                            </div>
+                        </div>
+                        <p>{{ review.comment }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center my-4">
+                    <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                    <p>No reviews yet for this destination.</p>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'reviews:add_destination_review' destination.id %}" class="btn btn-primary mt-2">Be the first to write a review</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Add weather loading script -->
+{% block extra_js %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements
+        const weatherLoading = document.getElementById('weather-loading');
+        const weatherContent = document.getElementById('weather-content');
+        const weatherError = document.getElementById('weather-error');
+        const weatherTemp = document.getElementById('weather-temp');
+        const weatherDesc = document.getElementById('weather-desc');
+        const weatherIcon = document.getElementById('weather-icon');
+        const weatherHumidity = document.getElementById('weather-humidity');
+        const weatherWind = document.getElementById('weather-wind');
+        
+        // Fetch current weather
+        fetch(`/destinations/api/weather/{{ destination.city }},{{ destination.country }}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Weather data unavailable');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update weather elements
+                weatherTemp.textContent = `${Math.round(data.temperature)}°C`;
+                weatherDesc.textContent = data.description.charAt(0).toUpperCase() + data.description.slice(1);
+                weatherIcon.src = data.icon_url;
+                weatherHumidity.textContent = `${data.humidity}%`;
+                weatherWind.textContent = `${data.wind_speed} m/s`;
+                
+                // Show content
+                weatherLoading.style.display = 'none';
+                weatherContent.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error fetching weather:', error);
+                weatherLoading.style.display = 'none';
+                weatherError.style.display = 'block';
+            });
+    });
+</script>
+{% endblock extra_js %}
+{% endblock content %} 

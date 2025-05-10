@@ -1,0 +1,198 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Add Transportation - {{ trip.title }} - Smart Travel{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">Add Transportation to "{{ trip.title }}"</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'bookings:trip_list' %}">My Trips</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'bookings:trip_detail' trip.id %}">{{ trip.title }}</a></li>
+                    <li class="breadcrumb-item active">Add Transportation</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'bookings:trip_detail' trip.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Trip
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-plane me-2"></i>Transportation Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.type.id_for_label }}" class="form-label">Type</label>
+                                    {{ form.type }}
+                                    {% if form.type.errors %}
+                                    <div class="text-danger">{{ form.type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.provider.id_for_label }}" class="form-label">Provider</label>
+                                    {{ form.provider }}
+                                    {% if form.provider.errors %}
+                                    <div class="text-danger">{{ form.provider.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.departure_location.id_for_label }}" class="form-label">Departure Location</label>
+                                    {{ form.departure_location }}
+                                    {% if form.departure_location.errors %}
+                                    <div class="text-danger">{{ form.departure_location.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.arrival_location.id_for_label }}" class="form-label">Arrival Location</label>
+                                    {{ form.arrival_location }}
+                                    {% if form.arrival_location.errors %}
+                                    <div class="text-danger">{{ form.arrival_location.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.departure_time.id_for_label }}" class="form-label">Departure Time</label>
+                                    {{ form.departure_time }}
+                                    <div class="form-text">Format: YYYY-MM-DD HH:MM</div>
+                                    {% if form.departure_time.errors %}
+                                    <div class="text-danger">{{ form.departure_time.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.arrival_time.id_for_label }}" class="form-label">Arrival Time</label>
+                                    {{ form.arrival_time }}
+                                    <div class="form-text">Format: YYYY-MM-DD HH:MM</div>
+                                    {% if form.arrival_time.errors %}
+                                    <div class="text-danger">{{ form.arrival_time.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.booking_reference.id_for_label }}" class="form-label">Booking Reference</label>
+                                    {{ form.booking_reference }}
+                                    <div class="form-text">Optional: Add if you already have a booking</div>
+                                    {% if form.booking_reference.errors %}
+                                    <div class="text-danger">{{ form.booking_reference.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.cost.id_for_label }}" class="form-label">Cost</label>
+                                    {{ form.cost }}
+                                    {% if form.cost.errors %}
+                                    <div class="text-danger">{{ form.cost.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-2"></i>Add Transportation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Trip Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Destination:</strong> {{ trip.destination.name }}</p>
+                    <p><strong>Dates:</strong> {{ trip.start_date|date:"M d, Y" }} - {{ trip.end_date|date:"M d, Y" }}</p>
+                    <p><strong>Duration:</strong> {{ trip.duration }} days</p>
+                    <p><strong>Budget:</strong> ${{ trip.budget }}</p>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Tips for Transportation</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li class="mb-2">For flights, include any layovers in your timing</li>
+                        <li class="mb-2">Consider transportation to and from the airport/station</li>
+                        <li class="mb-2">Check baggage allowances for your chosen provider</li>
+                        <li class="mb-2">Look for options that align with your trip dates</li>
+                    </ul>
+                </div>
+            </div>
+            
+            {% if trip.transportations.exists %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Existing Transportation</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for transport in trip.transportations.all %}
+                        <li class="list-group-item px-0">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    {% if transport.type == 'flight' %}
+                                    <i class="fas fa-plane text-primary fs-4"></i>
+                                    {% elif transport.type == 'train' %}
+                                    <i class="fas fa-train text-primary fs-4"></i>
+                                    {% elif transport.type == 'bus' %}
+                                    <i class="fas fa-bus text-primary fs-4"></i>
+                                    {% elif transport.type == 'car' %}
+                                    <i class="fas fa-car text-primary fs-4"></i>
+                                    {% elif transport.type == 'ferry' %}
+                                    <i class="fas fa-ship text-primary fs-4"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div><strong>{{ transport.get_type_display }} - {{ transport.provider }}</strong></div>
+                                    <div class="small">{{ transport.departure_location }} to {{ transport.arrival_location }}</div>
+                                    <div class="small text-muted">{{ transport.departure_time|date:"M d, Y H:i" }}</div>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

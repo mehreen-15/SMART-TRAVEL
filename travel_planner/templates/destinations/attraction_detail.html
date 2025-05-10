@@ -1,0 +1,170 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ attraction.name }} - Smart Travel{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Attraction Header -->
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'destinations:list' %}">Destinations</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'destinations:detail' attraction.destination.id %}">{{ attraction.destination.name }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ attraction.name }}</li>
+            </ol>
+        </nav>
+        
+        <div class="d-md-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-5">{{ attraction.name }}</h1>
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="badge bg-secondary">{{ attraction.get_category_display }}</span>
+                    <span class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ attraction.destination.city }}, {{ attraction.destination.country }}</span>
+                </div>
+            </div>
+            
+            {% if user.is_authenticated %}
+            <div class="mt-3 mt-md-0">
+                <a href="{% url 'reviews:add_attraction_review' attraction.id %}" class="btn btn-outline-primary"><i class="fas fa-edit me-2"></i>Write a Review</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <!-- Main Image -->
+            {% if attraction.image %}
+            <img src="{{ attraction.image.url }}" alt="{{ attraction.name }}" class="img-fluid rounded shadow-sm mb-4" style="width: 100%; height: 400px; object-fit: cover;">
+            {% else %}
+            <img src="{% static 'img/placeholder_attraction.jpg' %}" alt="{{ attraction.name }}" class="img-fluid rounded shadow-sm mb-4" style="width: 100%; height: 400px; object-fit: cover;">
+            {% endif %}
+            
+            <!-- Description -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>About {{ attraction.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">{{ attraction.description }}</p>
+                </div>
+            </div>
+            
+            <!-- Reviews -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Visitor Reviews</h4>
+                </div>
+                <div class="card-body">
+                    {% if reviews %}
+                    <div class="review-list">
+                        {% for review in reviews %}
+                        <div class="review-item {% if not forloop.last %}mb-4 pb-4 border-bottom{% endif %}">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="avatar me-3">
+                                    <img src="https://ui-avatars.com/api/?name={{ review.user.first_name }}+{{ review.user.last_name }}&background=0D8ABC&color=fff&size=40" alt="{{ review.user.username }}" class="rounded-circle">
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">{{ review.user.get_full_name }}</h5>
+                                    <div class="text-muted small">{{ review.created_at|date:"F d, Y" }}</div>
+                                </div>
+                                <div class="ms-auto">
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>{{ review.rating }}/5</span>
+                                    <span class="badge bg-info ms-1"><i class="fas fa-money-bill-wave me-1"></i>Value: {{ review.value_for_money }}/5</span>
+                                </div>
+                            </div>
+                            <p>{{ review.comment }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center my-4">
+                        <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                        <p>No reviews yet for this attraction.</p>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'reviews:add_attraction_review' attraction.id %}" class="btn btn-primary mt-2">Be the first to write a review</a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Info Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Attraction Information</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-tag me-2"></i>Category</span>
+                            <span class="badge bg-secondary">{{ attraction.get_category_display }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-clock me-2"></i>Opening Hours</span>
+                            <span>{{ attraction.opening_hours }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-ticket-alt me-2"></i>Entrance Fee</span>
+                            <span>
+                                {% if attraction.entrance_fee %}
+                                ${{ attraction.entrance_fee }}
+                                {% else %}
+                                Free
+                                {% endif %}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-map-marker-alt me-2"></i>Location</span>
+                            <span>{{ attraction.destination.city }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Other Attractions -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Other Attractions in {{ attraction.destination.name }}</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for other_attraction in attraction.destination.attractions.all %}
+                            {% if other_attraction.id != attraction.id %}
+                            <li class="list-group-item">
+                                <a href="{% url 'destinations:attraction_detail' other_attraction.id %}" class="text-decoration-none">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0 me-3">
+                                            {% if other_attraction.image %}
+                                            <img src="{{ other_attraction.image.url }}" alt="{{ other_attraction.name }}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                            {% else %}
+                                            <img src="https://source.unsplash.com/100x100/?{{ other_attraction.name }}" alt="{{ other_attraction.name }}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ other_attraction.name }}</h6>
+                                            <small class="text-muted">{{ other_attraction.get_category_display }}</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Trips Button -->
+    <div class="text-center mb-5">
+        <a href="{% url 'bookings:create_trip' %}?destination={{ attraction.destination.id }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-plane-departure me-2"></i>Plan a Trip to {{ attraction.destination.name }}
+        </a>
+    </div>
+</div>
+{% endblock %} 
