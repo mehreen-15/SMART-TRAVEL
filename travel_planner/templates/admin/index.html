@@ -1,0 +1,235 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  {{ extra_style|safe }}
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  
+  <!-- Dashboard Header -->
+  <div class="module">
+    <h1>Smart Travel Dashboard</h1>
+    <p>Welcome to the Smart Travel admin portal. Below you'll find key statistics and quick access to important data.</p>
+  </div>
+  
+  <!-- Quick Stats Summary -->
+  <div class="dashboard-section">
+    <h2>Quick Stats</h2>
+    <div class="dashboard-stats">
+      <div class="stat-box">
+        <div class="stat-value">{{ stats.users }}</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">{{ stats.active_users }}</div>
+        <div class="stat-label">Active Users</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">{{ stats.destinations }}</div>
+        <div class="stat-label">Destinations</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">{{ stats.trips }}</div>
+        <div class="stat-label">Trips</div>
+      </div>
+    </div>
+    <div class="dashboard-stats">
+      <div class="stat-box">
+        <div class="stat-value">{{ stats.hotel_bookings }}</div>
+        <div class="stat-label">Hotel Bookings</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">{{ stats.transportation_bookings }}</div>
+        <div class="stat-label">Transportation Bookings</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">{{ stats.tickets }}</div>
+        <div class="stat-label">E-Tickets Generated</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">${{ total_revenue|floatformat:2 }}</div>
+        <div class="stat-label">Total Revenue</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Links -->
+  <div class="dashboard-section">
+    <h2>Quick Access</h2>
+    <div class="quick-links">
+      {% for link in quick_links %}
+      <a href="{{ link.link }}" class="quick-link">
+        <div class="quick-link-icon" style="background-color: {{ link.color }}">
+          <i class="{{ link.icon }}"></i>
+        </div>
+        <div class="quick-link-text">{{ link.name }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- Recent Activity -->
+  <div class="dashboard-section">
+    <h2>Recent Activity</h2>
+    <div class="dashboard-grid">
+      <!-- Recent Hotel Bookings -->
+      <div class="dashboard-card">
+        <h3>Recent Hotel Bookings</h3>
+        {% if recent_hotel_bookings %}
+          {% for booking in recent_hotel_bookings %}
+            <div class="recent-item">
+              <a href="{% url 'admin:bookings_hotelbooking_change' booking.id %}">
+                <strong>{{ booking.accommodation.name }}</strong> 
+                <br>
+                <small>by {{ booking.trip.user.username }}, {{ booking.booking_date|date:"M d, Y" }} - {{ booking.get_status_display }}</small>
+              </a>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p>No recent hotel bookings.</p>
+        {% endif %}
+      </div>
+      
+      <!-- Recent Transportation Bookings -->
+      <div class="dashboard-card">
+        <h3>Recent Transportation Bookings</h3>
+        {% if recent_transportation_bookings %}
+          {% for booking in recent_transportation_bookings %}
+            <div class="recent-item">
+              <a href="{% url 'admin:bookings_transportationbooking_change' booking.id %}">
+                <strong>{{ booking.transportation.get_type_display }} Booking</strong> 
+                <br>
+                <small>by {{ booking.trip.user.username }}, {{ booking.booking_date|date:"M d, Y" }} - {{ booking.get_status_display }}</small>
+              </a>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p>No recent transportation bookings.</p>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="dashboard-grid" style="margin-top: 20px;">
+      <!-- Recent Payments -->
+      <div class="dashboard-card">
+        <h3>Recent Payments</h3>
+        {% if recent_payments %}
+          {% for payment in recent_payments %}
+            <div class="recent-item">
+              <a href="{% url 'admin:bookings_paymenttransaction_change' payment.id %}">
+                <strong>${{ payment.amount }}</strong> - {{ payment.get_payment_method_display }}
+                <br>
+                <small>by {{ payment.user.username }}, {{ payment.created_at|date:"M d, Y" }} - {{ payment.get_status_display }}</small>
+              </a>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p>No recent payments.</p>
+        {% endif %}
+      </div>
+      
+      <!-- Popular Destinations -->
+      <div class="dashboard-card">
+        <h3>Top Destinations</h3>
+        {% if popular_destinations %}
+          {% for destination in popular_destinations %}
+            <div class="recent-item">
+              <a href="{% url 'admin:destinations_destination_change' destination.id %}">
+                <strong>{{ destination.name }}, {{ destination.country }}</strong>
+                <br>
+                <small>Popularity Score: {{ destination.popularity_score }}</small>
+              </a>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p>No destinations available.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- App Modules -->
+  <div class="dashboard-section">
+    <h2>All Applications</h2>
+    {% for app in app_list %}
+      <div class="app-{{ app.app_label }} module{% if app.app_url in unopened_app_list %} collapsed{% endif %}">
+        <table>
+          <caption>
+            <a href="{{ app.app_url }}" class="section" title="{% blocktranslate with name=app.name %}Models in the {{ name }} application{% endblocktranslate %}">{{ app.name }}</a>
+          </caption>
+          {% for model in app.models %}
+            <tr class="model-{{ model.object_name|lower }}">
+              {% if model.admin_url %}
+                <th scope="row"><a href="{{ model.admin_url }}">{{ model.name }}</a></th>
+              {% else %}
+                <th scope="row">{{ model.name }}</th>
+              {% endif %}
+
+              {% if model.add_url %}
+                <td><a href="{{ model.add_url }}" class="addlink">{% translate 'Add' %}</a></td>
+              {% else %}
+                <td></td>
+              {% endif %}
+
+              {% if model.admin_url and show_changelinks %}
+                {% if model.view_only %}
+                  <td><a href="{{ model.admin_url }}" class="viewlink">{% translate 'View' %}</a></td>
+                {% else %}
+                  <td><a href="{{ model.admin_url }}" class="changelink">{% translate 'Change' %}</a></td>
+                {% endif %}
+              {% else %}
+                <td></td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+    <div class="module" id="recent-actions-module">
+        <h2>{% translate 'Recent actions' %}</h2>
+        <h3>{% translate 'My actions' %}</h3>
+        {% load log %}
+        {% get_admin_log 10 as admin_log for_user user %}
+        {% if not admin_log %}
+            <p>{% translate 'None available' %}</p>
+        {% else %}
+            <ul class="actionlist">
+                {% for entry in admin_log %}
+                <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                    {% if entry.is_deletion or not entry.get_admin_url %}
+                        {{ entry.object_repr }}
+                    {% else %}
+                        <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                    {% endif %}
+                    <br>
+                    {% if entry.content_type %}
+                        <span class="mini quiet">{% filter capfirst %}{{ entry.content_type.name }}{% endfilter %}</span>
+                    {% else %}
+                        <span class="mini quiet">{% translate 'Unknown content' %}</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 
