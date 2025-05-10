@@ -14,6 +14,11 @@ class TravelPlannerAdminSite(AdminSite):
     site_title = "Smart Travel Admin Portal"
     index_title = "Welcome to Smart Travel Admin Portal"
     
+    # Custom admin colors
+    admin_color_primary = "#1976d2"
+    admin_color_secondary = "#6c757d"
+    admin_color_accent = "#28a745"
+    
     def get_app_list(self, request):
         """
         Return a sorted list of all the installed apps that have been
@@ -69,49 +74,49 @@ class TravelPlannerAdminSite(AdminSite):
                 'name': 'Users',
                 'link': '/admin/auth/user/',
                 'icon': 'fas fa-users',
-                'color': '#3498db'
+                'color': '#1976d2'  # Primary blue
             },
             {
                 'name': 'Destinations',
                 'link': '/admin/destinations/destination/',
                 'icon': 'fas fa-map-marker-alt',
-                'color': '#2ecc71'
+                'color': '#28a745'  # Success green
             },
             {
                 'name': 'Trips',
                 'link': '/admin/bookings/trip/',
                 'icon': 'fas fa-suitcase',
-                'color': '#9b59b6'
+                'color': '#6f42c1'  # Purple
             },
             {
                 'name': 'Hotel Bookings',
                 'link': '/admin/bookings/hotelbooking/',
                 'icon': 'fas fa-hotel',
-                'color': '#f1c40f'
+                'color': '#fd7e14'  # Orange
             },
             {
                 'name': 'Transportation',
                 'link': '/admin/bookings/transportation/',
                 'icon': 'fas fa-plane',
-                'color': '#e74c3c'
+                'color': '#e83e8c'  # Pink
             },
             {
                 'name': 'Payments',
                 'link': '/admin/bookings/paymenttransaction/',
                 'icon': 'fas fa-credit-card',
-                'color': '#1abc9c'
+                'color': '#20c997'  # Teal
             },
             {
                 'name': 'E-Tickets',
                 'link': '/admin/bookings/eticket/',
                 'icon': 'fas fa-ticket-alt',
-                'color': '#e67e22'
+                'color': '#fd7e14'  # Orange
             },
             {
                 'name': 'Attractions',
                 'link': '/admin/destinations/attraction/',
                 'icon': 'fas fa-landmark',
-                'color': '#34495e'
+                'color': '#17a2b8'  # Info blue
             }
         ]
         

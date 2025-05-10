@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50" viewBox="0 0 200 50">
+  <style>
+    .logo-text { font-family: 'Arial', sans-serif; font-weight: bold; }
+    .text-primary { fill: #ffffff; }
+    .icon-primary { fill: #ffffff; }
+  </style>
+  
+  <!-- Icon -->
+  <path class="icon-primary" d="M25 10 C33 10, 40 17, 40 25 C40 33, 33 40, 25 40 C17 40, 10 33, 10 25 C10 17, 17 10, 25 10 Z M25 15 C20 15, 15 20, 15 25 C15 30, 20 35, 25 35 C30 35, 35 30, 35 25 C35 20, 30 15, 25 15 Z" />
+  
+  <!-- Airplane Icon -->
+  <path class="icon-primary" d="M25 20 L30 25 L25 30 L20 25 Z" />
+  <path class="icon-primary" d="M18 25 L32 25" />
+  
+  <!-- Text -->
+  <text x="50" y="30" class="logo-text text-primary" font-size="20">Smart Travel</text>
+</svg> 
