@@ -91,7 +91,7 @@
         {% if recent_hotel_bookings %}
           {% for booking in recent_hotel_bookings %}
             <div class="recent-item">
-              <a href="{% url 'admin:bookings_hotelbooking_change' booking.id %}">
+              <a href="{% url 'smarttravel_admin:bookings_hotelbooking_change' booking.id %}">
                 <strong>{{ booking.accommodation.name }}</strong> 
                 <br>
                 <small>by {{ booking.trip.user.username }}, {{ booking.booking_date|date:"M d, Y" }} - {{ booking.get_status_display }}</small>
@@ -109,7 +109,7 @@
         {% if recent_transportation_bookings %}
           {% for booking in recent_transportation_bookings %}
             <div class="recent-item">
-              <a href="{% url 'admin:bookings_transportationbooking_change' booking.id %}">
+              <a href="{% url 'smarttravel_admin:bookings_transportationbooking_change' booking.id %}">
                 <strong>{{ booking.transportation.get_type_display }} Booking</strong> 
                 <br>
                 <small>by {{ booking.trip.user.username }}, {{ booking.booking_date|date:"M d, Y" }} - {{ booking.get_status_display }}</small>
@@ -129,7 +129,7 @@
         {% if recent_payments %}
           {% for payment in recent_payments %}
             <div class="recent-item">
-              <a href="{% url 'admin:bookings_paymenttransaction_change' payment.id %}">
+              <a href="{% url 'smarttravel_admin:bookings_paymenttransaction_change' payment.id %}">
                 <strong>${{ payment.amount }}</strong> - {{ payment.get_payment_method_display }}
                 <br>
                 <small>by {{ payment.user.username }}, {{ payment.created_at|date:"M d, Y" }} - {{ payment.get_status_display }}</small>
@@ -147,7 +147,7 @@
         {% if popular_destinations %}
           {% for destination in popular_destinations %}
             <div class="recent-item">
-              <a href="{% url 'admin:destinations_destination_change' destination.id %}">
+              <a href="{% url 'smarttravel_admin:destinations_destination_change' destination.id %}">
                 <strong>{{ destination.name }}, {{ destination.country }}</strong>
                 <br>
                 <small>Popularity Score: {{ destination.popularity_score }}</small>

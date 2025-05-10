@@ -64,53 +64,53 @@ class TravelPlannerAdminSite(AdminSite):
         # Get recent payments (last 5)
         recent_payments = PaymentTransaction.objects.order_by('-created_at')[:5]
         
-        # Generate quick links
+        # Generate quick links with correct URL patterns for our custom admin site
         quick_links = [
             {
                 'name': 'Users',
-                'link': reverse('admin:auth_user_changelist'),
+                'link': reverse('smarttravel_admin:auth_user_changelist'),
                 'icon': 'fas fa-users',
                 'color': '#3498db'
             },
             {
                 'name': 'Destinations',
-                'link': reverse('admin:destinations_destination_changelist'),
+                'link': reverse('smarttravel_admin:destinations_destination_changelist'),
                 'icon': 'fas fa-map-marker-alt',
                 'color': '#2ecc71'
             },
             {
                 'name': 'Trips',
-                'link': reverse('admin:bookings_trip_changelist'),
+                'link': reverse('smarttravel_admin:bookings_trip_changelist'),
                 'icon': 'fas fa-suitcase',
                 'color': '#9b59b6'
             },
             {
                 'name': 'Hotel Bookings',
-                'link': reverse('admin:bookings_hotelbooking_changelist'),
+                'link': reverse('smarttravel_admin:bookings_hotelbooking_changelist'),
                 'icon': 'fas fa-hotel',
                 'color': '#f1c40f'
             },
             {
                 'name': 'Transportation',
-                'link': reverse('admin:bookings_transportation_changelist'),
+                'link': reverse('smarttravel_admin:bookings_transportation_changelist'),
                 'icon': 'fas fa-plane',
                 'color': '#e74c3c'
             },
             {
                 'name': 'Payments',
-                'link': reverse('admin:bookings_paymenttransaction_changelist'),
+                'link': reverse('smarttravel_admin:bookings_paymenttransaction_changelist'),
                 'icon': 'fas fa-credit-card',
                 'color': '#1abc9c'
             },
             {
                 'name': 'E-Tickets',
-                'link': reverse('admin:bookings_eticket_changelist'),
+                'link': reverse('smarttravel_admin:bookings_eticket_changelist'),
                 'icon': 'fas fa-ticket-alt',
                 'color': '#e67e22'
             },
             {
                 'name': 'Attractions',
-                'link': reverse('admin:destinations_attraction_changelist'),
+                'link': reverse('smarttravel_admin:destinations_attraction_changelist'),
                 'icon': 'fas fa-landmark',
                 'color': '#34495e'
             }
