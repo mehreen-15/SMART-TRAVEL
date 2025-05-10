@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'destinations',
     'bookings',
     'reviews',
+    # Add travel_planner as an app to include its models
+    'travel_planner',
 ]
 
 MIDDLEWARE = [
@@ -53,6 +55,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # SQLite connection tracking middleware
+    'travel_planner.middleware.SQLiteConnectionMiddleware',
 ]
 
 ROOT_URLCONF = 'travel_planner.urls'
@@ -68,6 +72,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # Custom context processor for database info
+                'travel_planner.context_processors.database_info',
             ],
         },
     },
@@ -79,25 +85,38 @@ WSGI_APPLICATION = 'travel_planner.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# SQLite Configuration
+# This is the production database for Smart Travel
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'CONN_MAX_AGE': 600,  # Keep connections alive for 10 minutes
+        'OPTIONS': {
+            'timeout': 20,  # Timeout in seconds
+            'check_same_thread': False,  # Allow multiple threads to use the same connection
+        },
+        'TEST': {
+            'NAME': BASE_DIR / 'test_db.sqlite3',  # Use separate test database
+        },
     }
 }
 
-# PostgreSQL configuration - commented out for now
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'travel_planner',
-#         'USER': 'postgres',
-#         'PASSWORD': 'postgres',  # Change this to a secure password in production
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
+# Database connection stats to be displayed in the admin dashboard
+DATABASE_CONNECTION_POOLING = True
+DATABASE_STATS_ENABLED = True
+MAX_CONNECTIONS = 100
 
+# SQLite performance optimizations
+# These will be applied on application startup
+SQLITE_PRAGMAS = {
+    'journal_mode': 'wal',       # Write-Ahead Logging for better concurrent access
+    'synchronous': 1,            # Normal synchronization (balance of safety and speed)
+    'cache_size': -10000,        # 10MB cache size (negative value means KB)
+    'temp_store': 2,             # Store temp tables and indices in memory
+    'mmap_size': 30000000000,    # 30GB memory-mapped I/O (adjust based on available RAM)
+    'foreign_keys': 1,           # Enable foreign key constraints
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

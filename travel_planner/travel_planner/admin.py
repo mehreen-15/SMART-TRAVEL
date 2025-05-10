@@ -3,11 +3,14 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User, Group
 from django.db.models import Count, Sum
 from django.utils.html import format_html
+from django.db import connection
+from django.contrib import admin
 
 # Import your models
 from users.models import UserProfile, TravelPreference
 from destinations.models import Destination, Accommodation, Attraction
 from bookings.models import Trip, HotelBooking, TransportationBooking, PaymentTransaction, ETicket
+from .models import DatabaseConnectionLog, DatabaseStatus
 
 class TravelPlannerAdminSite(AdminSite):
     site_header = "Smart Travel Admin"
@@ -68,6 +71,9 @@ class TravelPlannerAdminSite(AdminSite):
         # Get recent payments (last 5)
         recent_payments = PaymentTransaction.objects.order_by('-created_at')[:5]
         
+        # Get database performance statistics
+        db_stats = self.get_database_stats()
+        
         # Generate quick links using direct paths rather than URL reversals
         quick_links = [
             {
@@ -117,6 +123,12 @@ class TravelPlannerAdminSite(AdminSite):
                 'link': '/admin/destinations/attraction/',
                 'icon': 'fas fa-landmark',
                 'color': '#17a2b8'  # Info blue
+            },
+            {
+                'name': 'Database Stats',
+                'link': '/admin/travel_planner/databasestatus/',
+                'icon': 'fas fa-database',
+                'color': '#6c757d'  # Secondary gray
             }
         ]
         
@@ -128,6 +140,7 @@ class TravelPlannerAdminSite(AdminSite):
             'recent_transportation_bookings': recent_transportation_bookings,
             'recent_payments': recent_payments,
             'quick_links': quick_links,
+            'db_stats': db_stats,
             **super().index(request, extra_context=extra_context).context_data,
         }
         
@@ -233,6 +246,125 @@ class TravelPlannerAdminSite(AdminSite):
         context['extra_style'] = extra_css
         
         return super().index(request, extra_context=context)
+    
+    def get_database_stats(self):
+        """Get SQLite database statistics"""
+        try:
+            with connection.cursor() as cursor:
+                # Get SQLite version
+                cursor.execute("SELECT sqlite_version();")
+                version = cursor.fetchone()[0]
+                
+                # Get table count
+                cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table';")
+                table_count = cursor.fetchone()[0]
+                
+                # Get database size
+                cursor.execute("PRAGMA page_count;")
+                page_count = cursor.fetchone()[0]
+                cursor.execute("PRAGMA page_size;")
+                page_size = cursor.fetchone()[0]
+                size_mb = round((page_count * page_size) / (1024 * 1024), 2)
+                
+                # Get SQLite configuration
+                cursor.execute("PRAGMA journal_mode;")
+                journal_mode = cursor.fetchone()[0]
+                
+                cursor.execute("PRAGMA synchronous;")
+                synchronous = cursor.fetchone()[0]
+                
+                cursor.execute("PRAGMA cache_size;")
+                cache_size = cursor.fetchone()[0]
+                
+                # Get query statistics
+                cursor.execute("PRAGMA query_stats;")
+                query_stats = cursor.fetchone()
+                queries_executed = query_stats[0] if query_stats else 'N/A'
+                
+                # Get performance recommendations
+                recommendations = []
+                cursor.execute("PRAGMA integrity_check;")
+                integrity = cursor.fetchone()[0]
+                if integrity != 'ok':
+                    recommendations.append("Database integrity issues detected")
+                
+                if journal_mode.lower() != 'wal':
+                    recommendations.append("Consider using WAL journal mode for better performance")
+                
+                if synchronous > 1:
+                    recommendations.append("Consider reducing synchronous level for better performance")
+                
+                return {
+                    'engine': 'SQLite',
+                    'version': version,
+                    'tables': table_count,
+                    'size_mb': size_mb,
+                    'journal_mode': journal_mode,
+                    'synchronous': synchronous,
+                    'cache_size': cache_size,
+                    'queries_executed': queries_executed,
+                    'recommendations': recommendations,
+                    'connection_string': 'sqlite:///' + str(connection.settings_dict['NAME'])
+                }
+        except Exception as e:
+            return {
+                'engine': 'SQLite',
+                'error': str(e),
+                'connection_string': 'sqlite:///' + str(connection.settings_dict['NAME'])
+            }
 
 # Instantiate the custom admin site
-admin_site = TravelPlannerAdminSite(name='smarttravel_admin') 
+admin_site = TravelPlannerAdminSite(name='smarttravel_admin')
+
+# Register the database models with the admin site
+class DatabaseStatusAdmin(admin.ModelAdmin):
+    list_display = ('engine', 'version', 'size_mb', 'table_count', 'journal_mode', 'health_status', 'last_update')
+    readonly_fields = ('engine', 'version', 'size_bytes', 'table_count', 'index_count', 'journal_mode', 
+                      'synchronous_setting', 'cache_size', 'page_size', 'last_vacuum', 'integrity_check', 'last_update')
+    
+    fieldsets = (
+        ('Database Information', {
+            'fields': ('engine', 'version', 'size_bytes', 'table_count', 'index_count', 'last_update')
+        }),
+        ('Configuration', {
+            'fields': ('journal_mode', 'synchronous_setting', 'cache_size', 'page_size')
+        }),
+        ('Health', {
+            'fields': ('last_vacuum', 'integrity_check')
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        # Prevent manually adding database status entries
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        # Prevent deleting database status entries
+        return False
+
+class DatabaseConnectionLogAdmin(admin.ModelAdmin):
+    list_display = ('connection_id', 'timestamp', 'ip_address', 'query_count', 'query_time_ms', 'avg_query_time')
+    list_filter = ('timestamp', 'journal_mode')
+    search_fields = ('connection_id', 'ip_address', 'user_agent', 'tables_accessed')
+    readonly_fields = ('connection_id', 'timestamp', 'user_agent', 'ip_address', 'query_count', 'query_time_ms',
+                      'tables_accessed', 'journal_mode', 'page_size', 'cache_size', 'sqlite_version', 'connection_duration')
+    
+    fieldsets = (
+        ('Connection Information', {
+            'fields': ('connection_id', 'timestamp', 'user_agent', 'ip_address')
+        }),
+        ('Query Statistics', {
+            'fields': ('query_count', 'query_time_ms', 'tables_accessed')
+        }),
+        ('SQLite Configuration', {
+            'fields': ('journal_mode', 'page_size', 'cache_size', 'sqlite_version')
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        # Prevent manually adding connection logs
+        return False
+
+# Register the models with the admin site
+admin_site.register(DatabaseStatus, DatabaseStatusAdmin)
+admin_site.register(DatabaseConnectionLog, DatabaseConnectionLogAdmin) 
