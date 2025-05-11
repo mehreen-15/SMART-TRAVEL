@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'destinations',
     'bookings',
     'reviews',
+    'travel_planner',
     # Third-party apps for real-time functionality
     'channels',
     'django_eventstream',
@@ -105,7 +106,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'travel_planner',
         'USER': 'postgres',
-        'PASSWORD': 'postgres',  # In production, use environment variables
+        'PASSWORD': '12345',
         'HOST': 'localhost',
         'PORT': '5432',
         'CONN_MAX_AGE': 60,      # Keep connections alive for 60 seconds
@@ -147,6 +148,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Authentication settings
+LOGIN_URL = 'login'  # This resolves to the redirect_to_login view which redirects to users:login
+LOGIN_REDIRECT_URL = 'home'  # After login, redirect to home
 
 # Third-party API settings
 # Visual Crossing Weather API key
