@@ -22,10 +22,11 @@ from django.views.generic import TemplateView
 from . import views
 from .admin import admin_site  # Import our custom admin site
 from . import api
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('admin/', admin_site.urls),  # Use our custom admin site
-    path('admin/analytics/', views.analytics_dashboard, name='analytics_dashboard'),  # Real-time analytics dashboard
+    # path('admin/analytics/', views.analytics_dashboard, name='analytics_dashboard'),  # Real-time analytics dashboard
     # Home page
     path('', TemplateView.as_view(template_name='base/home.html'), name='home'),
     # Static pages
@@ -43,6 +44,11 @@ urlpatterns = [
     path('login/', views.redirect_to_login, name='login'),
     path('register/', views.redirect_to_register, name='register'),
     path('logout/', views.redirect_to_logout, name='logout'),
+    # Redirects for URL compatibility
+    path('trips/create/', RedirectView.as_view(pattern_name='bookings:create_trip', permanent=False)),
+    path('trips/', RedirectView.as_view(pattern_name='bookings:trip_list', permanent=False)),
+    path('accounts/login/', RedirectView.as_view(pattern_name='users:login', permanent=False)),
+    path('favicon.ico', RedirectView.as_view(url='/static/img/favicon.ico', permanent=True)),
     # API endpoints
     path('api/analytics/user-activity/', api.user_activity_data, name='api_user_activity'),
     path('api/analytics/bookings/', api.booking_data, name='api_bookings'),
