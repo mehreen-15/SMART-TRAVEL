@@ -46,4 +46,13 @@ def contact_view(request):
         except Exception as e:
             messages.error(request, f'An error occurred: {str(e)}')
     
-    return render(request, 'base/contact.html') 
+    return render(request, 'base/contact.html')
+
+def privacy(request):
+    return render(request, 'base/privacy.html')
+
+def terms(request):
+    return render(request, 'base/terms.html')
+
+def faq(request):
+    return render(request, 'base/faq.html')
