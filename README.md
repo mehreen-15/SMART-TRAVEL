@@ -1,197 +1,147 @@
-# Smart Travel - Travel Planning System
+# Smart Travel Planning and Recommendation System
 
-A comprehensive travel planning application that helps users discover destinations, plan trips, book accommodations and transportation, and check real-time weather information.
+A web-based platform that helps users plan their trips efficiently with personalized recommendations based on user preferences, budget, and real-time travel data.
 
-## How to Run This Project Locally (For Beginners)
+---
 
-This guide provides detailed, step-by-step instructions to get this project running on your local machine, even if you have no previous experience.
+## Windows 10 Setup Guide (No Prior Setup Required)
 
-### Step 1: Install Required Software
+Follow these steps carefully to avoid common mistakes and ensure a smooth setup.
 
-#### For Windows:
-1. **Install Python**:
-   - Download Python 3.8 or newer from [python.org](https://www.python.org/downloads/)
-   - During installation, check "Add Python to PATH" ✅
-   - Click "Install Now" and wait for installation to complete
+### 1. Install Python 3.11+
+- Download from: https://www.python.org/downloads/windows/
+- During installation, **check the box that says "Add Python to PATH"**.
 
-2. **Install Git**:
-   - Download Git from [git-scm.com](https://git-scm.com/download/win)
-   - Use the default options in the installer
+### 2. Install PostgreSQL
+- Download from: https://www.postgresql.org/download/windows/
+- During installation, **set a password for the `postgres` superuser** (remember this password!).
+- Complete the installation and note the version (e.g., 15, 16).
 
-#### For macOS:
-1. **Install Python**:
-   - Download Python 3.8 or newer from [python.org](https://www.python.org/downloads/)
-   - Run the installer and follow the instructions
+### 3. Add PostgreSQL to System PATH
+- Open File Explorer and go to `C:\Program Files\PostgreSQL\<your_version>\bin` (replace `<your_version>` with your installed version).
+- Copy this path.
+- Press `Win + S`, search for "Environment Variables", and open it.
+- Click "Environment Variables..." > In "System variables" select `Path` > Click "Edit..." > Click "New" and paste the path.
+- Click OK on all dialogs.
+- **Open a new Command Prompt or PowerShell window** for changes to take effect.
 
-2. **Install Git**:
-   - If you don't have Homebrew, install it by running this in Terminal:
-     ```
-     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-     ```
-   - Then install Git:
-     ```
-     brew install git
-     ```
+### 4. Create the Database
+- In the new terminal, run:
+  ```sh
+  psql -U postgres -c "CREATE DATABASE travel_planner;"
+  ```
+- If prompted, enter the password you set during PostgreSQL installation.
 
-#### For Linux (Ubuntu/Debian):
-1. **Update package list**:
-   ```
-   sudo apt update
-   ```
+### 5. Clone the Repository
+- Open a terminal and run:
+  ```sh
+  git clone <repository-url>
+  cd travel_planner
+  ```
 
-2. **Install Python and Git**:
-   ```
-   sudo apt install python3 python3-pip python3-venv git
-   ```
+### 6. Create and Activate a Virtual Environment
+- In the project root (`C:\Users\<YourName>\Desktop\SMARTTRAVEL`):
+  ```sh
+  python -m venv venv
+  venv\Scripts\activate
+  ```
+- You should see `(venv)` at the start of your prompt.
 
-### Step 2: Clone the Repository
+### 7. Install Python Dependencies
+- Run:
+  ```sh
+  pip install -r requirements.txt
+  ```
 
-1. **Open Terminal/Command Prompt**:
-   - Windows: Press `Win+R`, type `cmd` and press Enter
-   - macOS: Open Terminal from Applications > Utilities
-   - Linux: Open Terminal (Ctrl+Alt+T on Ubuntu)
+### 8. Configure Django Database Settings
+- Open `travel_planner/travel_planner/settings.py`.
+- Ensure the `DATABASES` section looks like this (replace `<your_postgres_password>`):
+  ```python
+  DATABASES = {
+      'default': {
+          'ENGINE': 'django.db.backends.postgresql',
+          'NAME': 'travel_planner',
+          'USER': 'postgres',
+          'PASSWORD': '<your_postgres_password>',
+          'HOST': 'localhost',
+          'PORT': '5432',
+      }
+  }
+  ```
 
-2. **Navigate to where you want to store the project**:
-   ```
-   cd Documents
-   ```
+### 9. Run Migrations
+- In the `travel_planner` directory:
+  ```sh
+  python manage.py migrate
+  ```
 
-3. **Clone the repository**:
-   ```
-   git clone https://github.com/KomaiX512/SMARTTRAVEL.git
-   ```
+### 10. Create a Superuser
+- Run:
+  ```sh
+  python manage.py createsuperuser
+  ```
+- Follow the prompts to set up an admin account.
 
-4. **Navigate into the project folder**:
-   ```
-   cd SMARTTRAVEL
-   ```
+### 11. Run the Development Server
+- Run:
+  ```sh
+  python manage.py runserver
+  ```
+- Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
 
-### Step 3: Set Up Virtual Environment
+---
 
-#### For Windows:
-1. **Create a virtual environment**:
-   ```
-   python -m venv venv
-   ```
+## Common Pitfalls & How to Avoid Them
+- **PostgreSQL not in PATH:** If `psql` is not recognized, repeat step 3 and open a new terminal.
+- **Wrong database/user/password:** Always use the `postgres` user and the password you set during installation, unless you know how to create/manage other users.
+- **Virtual environment not activated:** You must see `(venv)` in your prompt before running Django commands.
+- **Forgot to install dependencies:** Always run `pip install -r requirements.txt` after activating your virtual environment.
+- **Database does not exist:** Make sure you created the `travel_planner` database with `psql` before running migrations.
 
-2. **Activate the virtual environment**:
-   ```
-   venv\Scripts\activate
-   ```
-   You should see `(venv)` at the beginning of the command line
-
-#### For macOS/Linux:
-1. **Create a virtual environment**:
-   ```
-   python3 -m venv venv
-   ```
-
-2. **Activate the virtual environment**:
-   ```
-   source venv/bin/activate
-   ```
-   You should see `(venv)` at the beginning of the command line
-
-### Step 4: Install Dependencies
-
-1. **Install all required packages**:
-   ```
-   pip install -r requirements.txt
-   ```
-   This may take a few minutes to complete.
-
-### Step 5: Set Up the Database
-
-1. **Navigate to the Django project directory**:
-   ```
-   cd travel_planner
-   ```
-
-2. **Apply database migrations**:
-   ```
-   python manage.py migrate
-   ```
-
-3. **Create an admin user** (you'll need this to access the admin area):
-   ```
-   python manage.py createsuperuser
-   ```
-   Follow the prompts to create a username, email, and password.
-
-### Step 6: Configure Weather API (Optional)
-
-The app uses Visual Crossing Weather API for weather data. You can:
-
-1. **Sign up for a free API key** at [Visual Crossing](https://www.visualcrossing.com/weather-api)
-
-2. **Open the settings file**:
-   - Using a text editor, open `travel_planner/travel_planner/settings.py`
-   - Find the line with `VISUALCROSSING_WEATHER_API_KEY` and replace the value with your API key:
-     ```python
-     VISUALCROSSING_WEATHER_API_KEY = 'your_api_key_here'
-     ```
-
-### Step 7: Run the Development Server
-
-1. **Make sure you're in the Django project directory**:
-   ```
-   cd travel_planner  # Skip if you're already in this directory
-   ```
-
-2. **Start the development server**:
-   ```
-   python manage.py runserver
-   ```
-
-3. **Access the website**:
-   - Open your web browser
-   - Go to: http://127.0.0.1:8000/ or http://localhost:8000/
-
-4. **To stop the server**:
-   - Go back to your terminal/command prompt
-   - Press `Ctrl+C`
-
-### Step 8: Explore the Admin Interface
-
-1. **Access the admin page**:
-   - Go to: http://127.0.0.1:8000/admin/
-   - Log in with the superuser credentials you created earlier
-
-2. **Add sample data** to explore the application's features.
-
-### Troubleshooting Common Issues
-
-- **"Python/pip command not found"**: Make sure Python is installed and added to your PATH
-- **"No module named..."**: Make sure you've activated the virtual environment and installed dependencies
-- **Database errors**: Try deleting `db.sqlite3` file and running `python manage.py migrate` again
-- **Can't login to admin**: Run `python manage.py createsuperuser` to create a new admin user
+---
 
 ## Features
 
-- **Destination Discovery**: Browse and search for destinations with detailed information
-- **Trip Planning**: Create and manage trip itineraries
-- **Accommodation & Transportation Booking**: Book hotels and transportation options
-- **Weather Information**: View current weather and forecasts for destinations
-- **E-Ticket System**: Generate and download e-tickets for bookings
-- **User Preferences**: Personalized travel recommendations based on preferences
-- **Payment Simulation**: Demo payment processing system
+- User registration and profile management
+- Travel preference settings
+- Destination discovery and recommendations
+- Accommodation and attraction information
+- Real-time weather information and forecasts
+- Trip planning and itinerary creation
+- Booking management
+- User reviews and ratings
 
 ## Technologies Used
 
-- Django (Python web framework)
-- Bootstrap 5 (Front-end framework)
-- SQLite (Database)
+- Django 5.2 (Python web framework)
+- PostgreSQL (Database)
+- HTML/CSS (Frontend)
+- Bootstrap 5 (UI Framework)
+- Pillow (Image processing)
+- Django Allauth (Authentication)
+- Requests (API integration)
 - Visual Crossing Weather API (Weather data)
 
-## Demo Mode
+## Weather Features
 
-The application includes a demonstration mode for the payment system. No real payments are processed, and all transactions are simulated.
+The Smart Travel system includes comprehensive weather information for all destinations:
 
-## License
+- Current weather conditions displayed on destination detail pages
+- 5-day weather forecasts for trip planning
+- Weather-based activity recommendations
+- Detailed weather pages with conditions, humidity, wind speed, and more
+- Weather-appropriate packing suggestions
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## API Endpoints
 
-## Acknowledgements
+- `/destinations/weather/<destination_id>/`: Weather page for a destination
+- `/destinations/api/weather/<city>,<country>/`: JSON API for weather data
 
-- Weather data provided by [Visual Crossing Weather API](https://www.visualcrossing.com/)
-- Images from [Unsplash](https://unsplash.com/) 
+## Integrated APIs
+
+- [Visual Crossing Weather API](https://www.visualcrossing.com/): Provides current weather and forecast data
+- Other planned integrations:
+  - Maps integration for location-based services
+  - Payment gateway for booking processing 
+
+**If you follow these steps exactly, you will avoid all the common mistakes and have your Smart Travel system running smoothly on Windows 10!** 
