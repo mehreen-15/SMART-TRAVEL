@@ -1,0 +1,76 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Top Attractions - Smart Travel{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Top Attractions Around the World</h1>
+    
+    <!-- Categories Filter -->
+    <div class="mb-4">
+        <div class="d-flex flex-wrap justify-content-center">
+            <a href="?category=all" class="btn {% if not selected_category or selected_category == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %} m-1">All</a>
+            <a href="?category=nature" class="btn {% if selected_category == 'nature' %}btn-primary{% else %}btn-outline-primary{% endif %} m-1">Nature</a>
+            <a href="?category=history" class="btn {% if selected_category == 'history' %}btn-primary{% else %}btn-outline-primary{% endif %} m-1">Historical</a>
+            <a href="?category=culture" class="btn {% if selected_category == 'culture' %}btn-primary{% else %}btn-outline-primary{% endif %} m-1">Cultural</a>
+            <a href="?category=entertainment" class="btn {% if selected_category == 'entertainment' %}btn-primary{% else %}btn-outline-primary{% endif %} m-1">Entertainment</a>
+            <a href="?category=food" class="btn {% if selected_category == 'food' %}btn-primary{% else %}btn-outline-primary{% endif %} m-1">Food & Dining</a>
+        </div>
+    </div>
+
+    {% if attractions %}
+    <div class="row">
+        {% for attraction in attractions %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <!-- Using the image from Unsplash API -->
+                <div class="card-img-container" style="height: 250px; overflow: hidden;">
+                    <img src="{{ attraction.image_url }}" class="card-img-top" alt="{{ attraction.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="card-img-overlay d-flex flex-column justify-content-end" style="background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 70%);">
+                        <h5 class="card-title text-white mb-0">{{ attraction.name }}</h5>
+                        <p class="card-text text-white small">{{ attraction.destination.name }}, {{ attraction.destination.country }}</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-secondary">{{ attraction.get_category_display }}</span>
+                        <span class="text-muted small">{{ attraction.opening_hours }}</span>
+                    </div>
+                    <p class="card-text">{{ attraction.description|truncatewords:20 }}</p>
+                </div>
+                <div class="card-footer bg-white border-top-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>
+                            {% if attraction.entrance_fee %}
+                            <strong>${{ attraction.entrance_fee }}</strong>
+                            {% else %}
+                            <span class="text-success">Free entry</span>
+                            {% endif %}
+                        </span>
+                        <a href="{% url 'destinations:attraction_detail' attraction.id %}" class="btn btn-outline-primary btn-sm">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No attractions found for the selected category. <a href="?category=all">View all attractions</a>.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hover-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+</style>
+{% endblock %} 

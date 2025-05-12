@@ -1,0 +1,200 @@
+/* Custom Admin Theme for Smart Travel */
+
+:root {
+  --primary-color: #1976d2;
+  --primary-dark: #1565c0;
+  --primary-light: #bbdefb;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --info-color: #17a2b8;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --card-bg: #ffffff;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --heading-color: #212529;
+  --text-color: #495057;
+  --muted-color: #6c757d;
+  --border-color: #dee2e6;
+}
+
+/* Header */
+#header {
+  background: var(--primary-color);
+  color: white;
+}
+
+#header a:link, #header a:visited {
+  color: white;
+}
+
+#branding h1 {
+  color: white;
+}
+
+.module h2, .module caption, .inline-group h2 {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* Links */
+a:link, a:visited {
+  color: var(--primary-color);
+}
+
+a:hover {
+  color: var(--primary-dark);
+}
+
+/* Buttons */
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+  background: var(--primary-color);
+  color: white;
+  border-radius: 4px;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover {
+  background: var(--primary-dark);
+}
+
+.button.default, input[type=submit].default, .submit-row input.default {
+  background: var(--success-color);
+}
+
+.button.default:hover, input[type=submit].default:hover, .submit-row input.default:hover {
+  background: #218838;
+}
+
+/* Form Elements */
+.form-row {
+  border-bottom: 1px solid var(--border-color);
+}
+
+fieldset {
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.module {
+  border-radius: 4px;
+  box-shadow: var(--card-shadow);
+}
+
+.module h2, .module caption {
+  border-radius: 4px 4px 0 0;
+}
+
+/* Object tools and action buttons */
+.object-tools a {
+  background-color: var(--success-color);
+  border-radius: 4px;
+}
+
+.object-tools a:hover, .object-tools a:focus {
+  background-color: #218838;
+}
+
+/* Admin table */
+#changelist table thead th {
+  background: #f8f9fa;
+  color: var(--heading-color);
+}
+
+.row1 {
+  background: #fff;
+}
+
+.row2 {
+  background: #f8f9fa;
+}
+
+/* Sidebar */
+#nav-sidebar .current-model {
+  background: var(--primary-light);
+}
+
+#nav-sidebar a:hover {
+  background-color: var(--primary-light);
+}
+
+/* Dashboard styles */
+.dashboard .module h2, .dashboard .module caption {
+  background: var(--primary-color);
+}
+
+.dashboard .module h2 a, .dashboard .module caption a {
+  color: white !important;
+}
+
+/* Action links */
+.addlink {
+  color: var(--success-color) !important;
+}
+
+.changelink {
+  color: var(--warning-color) !important;
+}
+
+.deletelink {
+  color: var(--danger-color) !important;
+}
+
+/* Message styling */
+.messagelist li {
+  border-radius: 4px;
+}
+
+.messagelist li.success {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.messagelist li.warning {
+  background-color: var(--warning-color);
+  color: #212529;
+}
+
+.messagelist li.error {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+/* Calendar widget */
+.calendar caption, .calendarbox h2 {
+  background: var(--primary-color);
+  color: white;
+}
+
+.calendar td a:hover {
+  background: var(--primary-light);
+}
+
+.calendar td.selected a {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* Select2 overrides */
+.select2-container--admin-autocomplete .select2-results__option--highlighted[aria-selected] {
+  background-color: var(--primary-color) !important;
+}
+
+/* Responsive improvements */
+@media (max-width: 767px) {
+  #changelist-filter {
+    border-radius: 4px;
+    margin: 15px 0;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --card-bg: #2d3748;
+    --heading-color: #e2e8f0;
+    --text-color: #cbd5e0;
+    --muted-color: #a0aec0;
+    --border-color: #4a5568;
+  }
+} 

@@ -1,0 +1,304 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ trip.title }} - Smart Travel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trip-header {
+        background-color: #f8f9fa;
+        padding: 30px 0;
+        margin-bottom: 30px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .trip-image {
+        height: 220px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .booking-card {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 20px;
+    }
+    .booking-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    .booking-card-header {
+        background: linear-gradient(135deg, #4a90e2, #007bff);
+        color: white;
+        padding: 15px 20px;
+    }
+    .booking-card-body {
+        padding: 20px;
+        background-color: white;
+    }
+    .booking-status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .status-confirmed {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .status-cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 30px;
+    }
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+    .timeline-item::before {
+        content: "";
+        position: absolute;
+        left: -30px;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #007bff;
+        z-index: 1;
+    }
+    .timeline-item:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        left: -20px;
+        top: 20px;
+        width: 2px;
+        height: calc(100% - 20px);
+        background-color: #dee2e6;
+    }
+    .timeline-content {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="trip-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-3">{{ trip.title }}</h1>
+                <div class="d-flex align-items-center mb-3">
+                    <span class="badge bg-primary me-2">{{ trip.get_status_display }}</span>
+                    <span class="text-muted">{{ trip.start_date|date:"F d, Y" }} - {{ trip.end_date|date:"F d, Y" }}</span>
+                    <span class="mx-2">•</span>
+                    <span class="text-muted">{{ trip.duration }} days</span>
+                </div>
+                <p class="mb-0">{{ trip.description }}</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <img src="{{ trip.destination.image_url|default:'https://via.placeholder.com/400x220?text=Trip' }}" alt="{{ trip.destination.name }}" class="trip-image img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Trip Details</h2>
+                <div class="btn-group">
+                    <a href="{% url 'bookings:trip_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Trips
+                    </a>
+                    {% if trip.status == 'planned' %}
+                    <a href="#" class="btn btn-success">
+                        <i class="fas fa-check-circle me-2"></i>Confirm Trip
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Trip Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Trip Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Destination:</strong> {{ trip.destination.name }}, {{ trip.destination.city }}, {{ trip.destination.country }}</p>
+                            <p><strong>Duration:</strong> {{ trip.duration }} days</p>
+                            <p><strong>Budget:</strong> ${{ trip.budget }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Start Date:</strong> {{ trip.start_date|date:"F d, Y" }}</p>
+                            <p><strong>End Date:</strong> {{ trip.end_date|date:"F d, Y" }}</p>
+                            <p><strong>Created:</strong> {{ trip.created_at|date:"F d, Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Trip Timeline -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Trip Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <h5>Trip Planning</h5>
+                                <p class="mb-0">Trip created on {{ trip.created_at|date:"F d, Y" }}</p>
+                            </div>
+                        </div>
+                        
+                        {% if trip.hotel_bookings.exists or trip.transport_bookings.exists %}
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <h5>Bookings</h5>
+                                <p class="mb-0">
+                                    {% if trip.hotel_bookings.exists %}Hotel accommodations booked{% endif %}
+                                    {% if trip.hotel_bookings.exists and trip.transport_bookings.exists %} and {% endif %}
+                                    {% if trip.transport_bookings.exists %}Transportation booked{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <h5>Trip Start</h5>
+                                <p class="mb-0">{{ trip.start_date|date:"F d, Y" }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <h5>Trip End</h5>
+                                <p class="mb-0">{{ trip.end_date|date:"F d, Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Booking Actions -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Booking Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        {% if not trip.hotel_bookings.exists %}
+                        <a href="{% url 'bookings:book_hotel' trip.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-bed me-2"></i>Book Hotel
+                        </a>
+                        {% endif %}
+                        
+                        {% if not trip.transport_bookings.exists %}
+                        <a href="{% url 'bookings:book_transportation' trip.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-plane me-2"></i>Book Transportation
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hotel Bookings -->
+            {% if trip.hotel_bookings.exists %}
+            <div class="booking-card">
+                <div class="booking-card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Hotel Booking</h5>
+                    {% with hotel_booking=trip.hotel_bookings.first %}
+                    {% if hotel_booking.eticket %}
+                    <a href="{% url 'bookings:view_eticket' hotel_booking.eticket.id %}" class="btn btn-sm btn-light">
+                        <i class="fas fa-ticket-alt me-1"></i>View E-Ticket
+                    </a>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+                <div class="booking-card-body">
+                    {% with hotel_booking=trip.hotel_bookings.first %}
+                    <div class="mb-3">
+                        <span class="booking-status {% if hotel_booking.status == 'confirmed' %}status-confirmed{% elif hotel_booking.status == 'pending' %}status-pending{% else %}status-cancelled{% endif %}">
+                            {{ hotel_booking.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <p><strong>Hotel:</strong> {{ hotel_booking.accommodation.name }}</p>
+                    <p><strong>Check-in:</strong> {{ hotel_booking.check_in_date|date:"F d, Y" }}</p>
+                    <p><strong>Check-out:</strong> {{ hotel_booking.check_out_date|date:"F d, Y" }}</p>
+                    <p><strong>Room Type:</strong> {{ hotel_booking.room_type }}</p>
+                    <p><strong>Guests:</strong> {{ hotel_booking.guests }}</p>
+                    <p><strong>Total Cost:</strong> ${{ hotel_booking.total_cost }}</p>
+                    
+                    {% if not hotel_booking.eticket and hotel_booking.status == 'confirmed' %}
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-circle me-2"></i>E-ticket not yet generated
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Transportation Bookings -->
+            {% if trip.transport_bookings.exists %}
+            <div class="booking-card">
+                <div class="booking-card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Transportation Booking</h5>
+                    {% with transportation_booking=trip.transport_bookings.first %}
+                    {% if transportation_booking.eticket %}
+                    <a href="{% url 'bookings:view_eticket' transportation_booking.eticket.id %}" class="btn btn-sm btn-light">
+                        <i class="fas fa-ticket-alt me-1"></i>View E-Ticket
+                    </a>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+                <div class="booking-card-body">
+                    {% with transportation_booking=trip.transport_bookings.first %}
+                    <div class="mb-3">
+                        <span class="booking-status {% if transportation_booking.status == 'confirmed' %}status-confirmed{% elif transportation_booking.status == 'pending' %}status-pending{% else %}status-cancelled{% endif %}">
+                            {{ transportation_booking.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <p><strong>Type:</strong> {{ transportation_booking.transportation.get_type_display }}</p>
+                    <p><strong>Provider:</strong> {{ transportation_booking.transportation.provider }}</p>
+                    <p><strong>From:</strong> {{ transportation_booking.transportation.departure_location }}</p>
+                    <p><strong>To:</strong> {{ transportation_booking.transportation.arrival_location }}</p>
+                    <p><strong>Departure:</strong> {{ transportation_booking.transportation.departure_time|date:"F d, Y H:i" }}</p>
+                    <p><strong>Arrival:</strong> {{ transportation_booking.transportation.arrival_time|date:"F d, Y H:i" }}</p>
+                    <p><strong>Total Cost:</strong> ${{ transportation_booking.total_cost }}</p>
+                    
+                    {% if not transportation_booking.eticket and transportation_booking.status == 'confirmed' %}
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-circle me-2"></i>E-ticket not yet generated
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

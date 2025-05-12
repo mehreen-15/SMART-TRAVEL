@@ -1,0 +1,215 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Book Transportation - {{ trip.title }} - Smart Travel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .transportation-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    .transportation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .selected-transportation {
+        border-color: #0d6efd;
+        box-shadow: 0 0 10px rgba(13, 110, 253, 0.3);
+    }
+    .transport-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">Book Transportation for "{{ trip.title }}"</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'bookings:trip_list' %}">My Trips</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'bookings:trip_detail' trip.id %}">{{ trip.title }}</a></li>
+                    <li class="breadcrumb-item active">Book Transportation</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'bookings:trip_detail' trip.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Trip
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-plane me-2"></i>Transportation Booking</h5>
+                </div>
+                <div class="card-body">
+                    {% if trip.transportations.exists %}
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <h5 class="mb-3">Select Transportation</h5>
+                                {% for transportation in trip.transportations.all %}
+                                <div class="card mb-3 transportation-card {% if forloop.first %}selected-transportation{% endif %}">
+                                    <div class="card-body">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="{{ form.transportation.name }}" id="transportation_{{ transportation.id }}" value="{{ transportation.id }}" {% if forloop.first %}checked{% endif %}>
+                                            <label class="form-check-label w-100" for="transportation_{{ transportation.id }}">
+                                                <div class="row">
+                                                    <div class="col-md-2 text-center">
+                                                        <div class="transport-icon text-primary">
+                                                            {% if transportation.type == 'flight' %}
+                                                                <i class="fas fa-plane"></i>
+                                                            {% elif transportation.type == 'train' %}
+                                                                <i class="fas fa-train"></i>
+                                                            {% elif transportation.type == 'bus' %}
+                                                                <i class="fas fa-bus"></i>
+                                                            {% elif transportation.type == 'car' %}
+                                                                <i class="fas fa-car"></i>
+                                                            {% elif transportation.type == 'ferry' %}
+                                                                <i class="fas fa-ship"></i>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div><strong>{{ transportation.get_type_display }}</strong></div>
+                                                    </div>
+                                                    <div class="col-md-10">
+                                                        <div class="row mb-2">
+                                                            <div class="col-md-5">
+                                                                <div class="small text-muted">From</div>
+                                                                <div><strong>{{ transportation.departure_location }}</strong></div>
+                                                                <div>{{ transportation.departure_time|date:"M d, Y H:i" }}</div>
+                                                            </div>
+                                                            <div class="col-md-2 text-center d-flex align-items-center justify-content-center">
+                                                                <i class="fas fa-arrow-right"></i>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <div class="small text-muted">To</div>
+                                                                <div><strong>{{ transportation.arrival_location }}</strong></div>
+                                                                <div>{{ transportation.arrival_time|date:"M d, Y H:i" }}</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="small text-muted">Provider</div>
+                                                                <div>{{ transportation.provider }}</div>
+                                                            </div>
+                                                            <div class="col-md-6 text-md-end">
+                                                                <div class="small text-muted">Cost</div>
+                                                                <div class="text-primary"><strong>${{ transportation.cost }}</strong></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                
+                                {% if form.transportation.errors %}
+                                <div class="text-danger mb-3">{{ form.transportation.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="{{ form.passenger_names.id_for_label }}" class="form-label">Passenger Names</label>
+                                {{ form.passenger_names }}
+                                <div class="form-text">Enter one passenger name per line.</div>
+                                {% if form.passenger_names.errors %}
+                                <div class="text-danger">{{ form.passenger_names.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-check-circle me-2"></i>Proceed to Payment
+                                </button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <h5><i class="fas fa-exclamation-triangle me-2"></i>No Transportation Options Available</h5>
+                            <p>You need to add transportation details before booking.</p>
+                            <a href="{% url 'bookings:add_transportation' trip.id %}" class="btn btn-primary mt-2">
+                                <i class="fas fa-plus me-2"></i>Add Transportation
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Trip Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Destination:</strong> {{ trip.destination.name }}</p>
+                    <p><strong>Dates:</strong> {{ trip.start_date|date:"M d, Y" }} - {{ trip.end_date|date:"M d, Y" }}</p>
+                    <p><strong>Duration:</strong> {{ trip.duration }} days</p>
+                    <p><strong>Budget:</strong> ${{ trip.budget }}</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Need Help?</h5>
+                </div>
+                <div class="card-body">
+                    <p>Have questions about transportation booking? Our support team is here to help.</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-question-circle me-2"></i>Get Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle transportation selection
+        const transportationCards = document.querySelectorAll('.transportation-card');
+        const transportationRadios = document.querySelectorAll('input[name="{{ form.transportation.name }}"]');
+        
+        function updateSelectedTransportation() {
+            transportationCards.forEach(card => {
+                card.classList.remove('selected-transportation');
+            });
+            
+            const selectedRadio = document.querySelector('input[name="{{ form.transportation.name }}"]:checked');
+            if (selectedRadio) {
+                const selectedCard = selectedRadio.closest('.transportation-card');
+                if (selectedCard) {
+                    selectedCard.classList.add('selected-transportation');
+                }
+            }
+        }
+        
+        transportationRadios.forEach(radio => {
+            radio.addEventListener('change', updateSelectedTransportation);
+        });
+        
+        transportationCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const radio = this.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+                    updateSelectedTransportation();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 

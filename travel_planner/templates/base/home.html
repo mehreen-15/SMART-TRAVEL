@@ -1,0 +1,588 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Smart Travel - Plan Your Perfect Trip{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section Styles */
+    .hero-parallax {
+        height: 90vh;
+        background-image: url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=2000');
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        position: relative;
+        margin-bottom: 3rem;
+        overflow: hidden;
+    }
+    
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+        z-index: 1;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 0 20px;
+    }
+    
+    .hero-title {
+        font-size: 4rem;
+        color: #fff;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        animation: fadeInDown 1.2s ease-out;
+    }
+    
+    .hero-text {
+        font-size: 1.5rem;
+        color: #fff;
+        margin-bottom: 2rem;
+        max-width: 700px;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        animation: fadeInUp 1.2s ease-out;
+    }
+    
+    .hero-buttons {
+        animation: fadeIn 2s ease-out;
+    }
+    
+    .hero-btn {
+        padding: 0.8rem 2rem;
+        font-size: 1.1rem;
+        margin: 0 10px;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .hero-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    
+    .hero-btn-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        border: none;
+        color: white;
+    }
+    
+    .hero-btn-outline {
+        background: transparent;
+        border: 2px solid white;
+        color: white;
+    }
+    
+    .hero-btn-outline:hover {
+        background: rgba(255,255,255,0.1);
+    }
+    
+    /* Animated floating clouds */
+    .cloud {
+        position: absolute;
+        opacity: 0.7;
+        z-index: 1;
+    }
+    
+    .cloud-1 {
+        top: 10%;
+        left: -10%;
+        animation: floatCloud 80s linear infinite;
+    }
+    
+    .cloud-2 {
+        top: 30%;
+        left: -5%;
+        animation: floatCloud 60s linear infinite;
+    }
+    
+    /* Section styles */
+    .section-title {
+        position: relative;
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+        font-weight: 700;
+        color: #333;
+    }
+    
+    .section-title:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 70px;
+        height: 3px;
+        background: linear-gradient(90deg, #0d6efd 0%, #0dcaf0 100%);
+    }
+    
+    /* Feature cards */
+    .feature-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover .feature-icon {
+        transform: rotateY(180deg);
+    }
+    
+    .feature-icon i {
+        font-size: 36px;
+        color: white;
+    }
+    
+    /* Destination cards */
+    .destination-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        position: relative;
+        margin-bottom: 30px;
+    }
+    
+    .destination-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    
+    .destination-img {
+        height: 220px;
+        object-fit: cover;
+        transition: transform 1.5s;
+    }
+    
+    .destination-card:hover .destination-img {
+        transform: scale(1.1);
+    }
+    
+    .destination-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+        padding: 30px 20px 20px;
+    }
+    
+    .destination-title {
+        color: white;
+        font-weight: 700;
+        margin-bottom: 5px;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    }
+    
+    .destination-text {
+        color: rgba(255,255,255,0.9);
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    
+    .destination-btn {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 0.5rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    
+    .destination-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 15px rgba(0,0,0,0.3);
+        color: white;
+    }
+    
+    /* Testimonial styles */
+    .testimonial-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 20px;
+        padding: 50px 30px;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .testimonial-section::before {
+        content: '\201C';
+        position: absolute;
+        top: -50px;
+        left: 30px;
+        font-size: 200px;
+        color: rgba(13, 110, 253, 0.1);
+        font-family: Georgia, serif;
+    }
+    
+    .testimonial-card {
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+    }
+    
+    /* Call to action */
+    .cta-section {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        border-radius: 20px;
+        padding: 50px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(13, 110, 253, 0.3);
+    }
+    
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1000');
+        background-size: cover;
+        background-position: center;
+        opacity: 0.15;
+    }
+    
+    .cta-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .cta-btn {
+        background: white;
+        color: #0d6efd;
+        border: none;
+        border-radius: 50px;
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .cta-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        background: #f8f9fa;
+        color: #0a58ca;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes floatCloud {
+        from { transform: translateX(0); }
+        to { transform: translateX(2000px); }
+    }
+    
+    /* Animated elements */
+    .animate-fade-in {
+        animation: fadeIn 1s ease-out forwards;
+        opacity: 0;
+        animation-delay: 0.3s;
+    }
+    
+    .animate-fade-up {
+        animation: fadeInUp 1s ease-out forwards;
+        opacity: 0;
+        animation-delay: 0.5s;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Parallax -->
+<section class="hero-parallax">
+    <div class="hero-overlay"></div>
+    <!-- Animated clouds -->
+    <img src="https://cdn-icons-png.flaticon.com/512/414/414927.png" alt="Cloud" class="cloud cloud-1" width="200">
+    <img src="https://cdn-icons-png.flaticon.com/512/414/414927.png" alt="Cloud" class="cloud cloud-2" width="150">
+    <div class="hero-content">
+        <h1 class="hero-title">Discover Your Perfect Journey</h1>
+        <p class="hero-text">Personalized travel experiences tailored to your style, budget, and dreams</p>
+        <div class="hero-buttons">
+            <a href="{% url 'destinations:list' %}" class="btn hero-btn hero-btn-primary">Explore Destinations</a>
+            <a href="/trips/create/" class="btn hero-btn hero-btn-outline">Plan Your Trip</a>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Features Section -->
+    <section class="features mb-5">
+        <h2 class="section-title">Why Choose Smart Travel</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <h5 class="card-title mb-3">Personalized Recommendations</h5>
+                        <p class="card-text">Discover destinations that match your unique travel preferences, from adventure to relaxation and everything in between.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h5 class="card-title mb-3">Smart Itinerary Planning</h5>
+                        <p class="card-text">Create detailed day-by-day schedules with attractions, activities, and reservations all in one place.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-cloud-sun"></i>
+                        </div>
+                        <h5 class="card-title mb-3">Real-Time Updates</h5>
+                        <p class="card-text">Stay informed with weather forecasts and travel conditions so you're always prepared for your journey.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Destinations -->
+    <section class="popular-destinations mb-5 animate-fade-in">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0">Popular Destinations</h2>
+            <a href="{% url 'destinations:list' %}" class="btn btn-outline-primary rounded-pill px-4">View All</a>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-6">
+                <div class="destination-card">
+                    <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200" class="card-img-top destination-img" alt="Paris">
+                    <div class="destination-overlay">
+                        <h5 class="destination-title">Paris, France</h5>
+                        <p class="destination-text">Experience the romance and charm of the City of Light.</p>
+                        <a href="{% url 'destinations:detail' 1 %}" class="btn destination-btn">Explore Paris</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="destination-card">
+                    <img src="https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200" class="card-img-top destination-img" alt="Santorini">
+                    <div class="destination-overlay">
+                        <h5 class="destination-title">Santorini, Greece</h5>
+                        <p class="destination-text">Enjoy the stunning views of the blue-domed churches and Aegean Sea.</p>
+                        <a href="{% url 'destinations:detail' 2 %}" class="btn destination-btn">Explore Santorini</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="destination-card">
+                    <img src="https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200" class="card-img-top destination-img" alt="Grand Canyon">
+                    <div class="destination-overlay">
+                        <h5 class="destination-title">Grand Canyon, USA</h5>
+                        <p class="destination-text">Witness the breathtaking natural wonder of the world.</p>
+                        <a href="{% url 'destinations:detail' 3 %}" class="btn destination-btn">Explore Grand Canyon</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="destination-card">
+                    <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200" class="card-img-top destination-img" alt="Kyoto">
+                    <div class="destination-overlay">
+                        <h5 class="destination-title">Kyoto, Japan</h5>
+                        <p class="destination-text">Discover ancient temples and the beautiful Cherry Blossom season.</p>
+                        <a href="{% url 'destinations:detail' 4 %}" class="btn destination-btn">Explore Kyoto</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonial-section animate-fade-up">
+        <h2 class="section-title">What Our Travelers Say</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="testimonial-card h-100">
+                    <div class="card-body p-4">
+                        <div class="star-rating mb-3">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="card-text mb-4">"Smart Travel made planning our honeymoon so easy! The personalized recommendations were spot on, and we had the trip of a lifetime to Bali."</p>
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=150" class="rounded-circle" width="50" height="50" alt="Sarah J." style="object-fit: cover;">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0">Sarah J.</h6>
+                                <small class="text-muted">Bali Trip, 2023</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="testimonial-card h-100">
+                    <div class="card-body p-4">
+                        <div class="star-rating mb-3">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <p class="card-text mb-4">"I travel for business frequently, and this app has transformed how I manage my trips. The real-time updates saved me during a storm in Chicago."</p>
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=150" class="rounded-circle" width="50" height="50" alt="Michael T." style="object-fit: cover;">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0">Michael T.</h6>
+                                <small class="text-muted">Business Traveler</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="testimonial-card h-100">
+                    <div class="card-body p-4">
+                        <div class="star-rating mb-3">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="card-text mb-4">"As a solo female traveler, I appreciated the safety tips and community reviews. Found amazing hidden gems I would have missed otherwise!"</p>
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=150" class="rounded-circle" width="50" height="50" alt="Elena R." style="object-fit: cover;">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0">Elena R.</h6>
+                                <small class="text-muted">Southeast Asia Tour</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section text-center mb-5 animate-fade-in">
+        <div class="cta-content">
+            <h2 class="mb-3 fw-bold">Ready to Start Your Adventure?</h2>
+            <p class="lead mb-4">Join thousands of happy travelers who plan their perfect trips with Smart Travel</p>
+            <a href="{% url 'users:register' %}" class="btn cta-btn">Sign Up Now</a>
+        </div>
+    </section>
+</div>
+
+{% block extra_js %}
+<script>
+    // Animate elements when they enter the viewport
+    document.addEventListener('DOMContentLoaded', function() {
+        const animateElements = document.querySelectorAll('.animate-fade-in, .animate-fade-up');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+        
+        animateElements.forEach(element => {
+            element.style.animationPlayState = 'paused';
+            observer.observe(element);
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

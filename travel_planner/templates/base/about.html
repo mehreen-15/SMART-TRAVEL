@@ -1,0 +1,136 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}About Us - Smart Travel{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold mb-4">About Smart Travel</h1>
+            <p class="lead mb-4">We're on a mission to make travel planning smarter, easier, and more personalized.</p>
+        </div>
+    </div>
+    
+    <!-- Our Story -->
+    <div class="row mb-5 align-items-center">
+        <div class="col-md-6 mb-4 mb-md-0">
+            <img src="{% static 'img/placeholder_destination.jpg' %}" alt="Team Planning" class="img-fluid rounded shadow">
+        </div>
+        <div class="col-md-6">
+            <h2 class="mb-4">Our Story</h2>
+            <p>Smart Travel was founded in 2022 by a group of passionate travelers who were frustrated with the complexity of planning trips. We wanted to create a platform that takes the stress out of travel planning and helps everyone experience the joy of discovering new places.</p>
+            <p>What started as a small project has grown into a comprehensive travel planning solution that combines personalized recommendations, detailed trip planning tools, and a community of like-minded travelers.</p>
+            <p>Today, Smart Travel helps thousands of users plan their perfect trips by providing personalized recommendations based on their preferences, budget, and interests.</p>
+        </div>
+    </div>
+    
+    <!-- Our Mission -->
+    <div class="row mb-5 align-items-center">
+        <div class="col-md-6 order-md-2 mb-4 mb-md-0">
+            <img src="{% static 'img/placeholder_destination.jpg' %}" alt="Travel Destinations" class="img-fluid rounded shadow">
+        </div>
+        <div class="col-md-6 order-md-1">
+            <h2 class="mb-4">Our Mission</h2>
+            <p>At Smart Travel, we believe that travel has the power to transform lives, broaden perspectives, and create meaningful connections. Our mission is to make travel planning accessible to everyone by providing smart tools and personalized recommendations.</p>
+            <p>We are committed to:</p>
+            <ul>
+                <li>Creating a user-friendly platform that simplifies travel planning</li>
+                <li>Providing personalized recommendations based on individual preferences</li>
+                <li>Offering comprehensive information about destinations around the world</li>
+                <li>Building a community of travelers who share insights and experiences</li>
+                <li>Promoting responsible and sustainable tourism</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Our Team -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <h2>Meet Our Team</h2>
+            <p class="lead">Passionate travelers working to make your journey amazing</p>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <img src="{% static 'img/placeholder_destination.jpg' %}" class="card-img-top" alt="Team Member">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Michael Torres</h5>
+                    <p class="card-text text-muted">Founder & CEO</p>
+                    <p class="card-text">Travel enthusiast with a passion for technology and user experience.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <img src="{% static 'img/placeholder_destination.jpg' %}" class="card-img-top" alt="Team Member">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Sarah Johnson</h5>
+                    <p class="card-text text-muted">Chief Travel Officer</p>
+                    <p class="card-text">Former travel guide who has visited over 50 countries across 6 continents.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <img src="{% static 'img/placeholder_destination.jpg' %}" class="card-img-top" alt="Team Member">
+                <div class="card-body text-center">
+                    <h5 class="card-title">David Chen</h5>
+                    <p class="card-text text-muted">CTO</p>
+                    <p class="card-text">Tech wizard who builds the algorithms that power our recommendations.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <img src="{% static 'img/placeholder_destination.jpg' %}" class="card-img-top" alt="Team Member">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Lisa Rodriguez</h5>
+                    <p class="card-text text-muted">Head of Customer Experience</p>
+                    <p class="card-text">Dedicated to ensuring every user has an amazing experience with us.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-5">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <h2 class="display-4 fw-bold">10K+</h2>
+                            <p class="mb-0">Satisfied Users</p>
+                        </div>
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <h2 class="display-4 fw-bold">500+</h2>
+                            <p class="mb-0">Destinations</p>
+                        </div>
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <h2 class="display-4 fw-bold">2K+</h2>
+                            <p class="mb-0">Trips Planned</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h2 class="display-4 fw-bold">4.8</h2>
+                            <p class="mb-0">User Rating</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Call to Action -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <h2 class="mb-4">Ready to Plan Your Dream Trip?</h2>
+            <p class="lead mb-4">Join thousands of travelers who are using Smart Travel to plan unforgettable journeys.</p>
+            <div class="d-flex justify-content-center">
+                <a href="{% url 'users:register' %}" class="btn btn-primary btn-lg me-3">Sign Up Now</a>
+                <a href="{% url 'destinations:list' %}" class="btn btn-outline-primary btn-lg">Explore Destinations</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

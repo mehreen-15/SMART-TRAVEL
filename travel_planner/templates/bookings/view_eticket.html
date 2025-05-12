@@ -1,0 +1,207 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}E-Ticket #{{ ticket.id }} - Smart Travel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ticket-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .ticket {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: white;
+    }
+    .ticket-header {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+    }
+    .ticket-body {
+        padding: 20px;
+    }
+    .ticket-footer {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-top: 1px solid #ddd;
+    }
+    .ticket-logo {
+        max-height: 60px;
+    }
+    .ticket-qr {
+        max-width: 150px;
+        margin: 0 auto;
+    }
+    .booking-type {
+        text-transform: uppercase;
+        font-weight: 600;
+        color: #0d6efd;
+    }
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        body {
+            background-color: white !important;
+        }
+        .container-fluid {
+            padding: 0 !important;
+        }
+        .ticket {
+            border: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="ticket-container">
+        <div class="no-print mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1>E-Ticket #{{ ticket.id }}</h1>
+                <div>
+                    <a href="{% url 'bookings:download_eticket' ticket.id %}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-download me-1"></i> Download
+                    </a>
+                    <button onclick="window.print()" class="btn btn-outline-secondary">
+                        <i class="fas fa-print me-1"></i> Print
+                    </button>
+                    <a href="{% url 'bookings:trip_detail' ticket.booking.trip.id %}" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Trip
+                    </a>
+                </div>
+            </div>
+            <hr>
+        </div>
+        
+        <div class="ticket mb-4">
+            <div class="ticket-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <img src="{% static 'images/logo.png' %}" alt="Smart Travel Logo" class="ticket-logo" onerror="this.src='https://via.placeholder.com/180x60?text=Smart+Travel'">
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="booking-type">{{ ticket.booking_type }} E-TICKET</div>
+                        <div class="text-muted">Booking Ref: {{ ticket.booking.reference_number }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ticket-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        {% if ticket.booking_type == 'HOTEL' %}
+                            <!-- Hotel Booking Details -->
+                            <h4>{{ ticket.booking.hotel.name }}</h4>
+                            <p class="mb-4">{{ ticket.booking.hotel.address }}</p>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <div class="text-muted">Check-in</div>
+                                    <div class="fw-bold">{{ ticket.booking.check_in_date|date:"D, M d, Y" }}</div>
+                                    <div>After 3:00 PM</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-muted">Check-out</div>
+                                    <div class="fw-bold">{{ ticket.booking.check_out_date|date:"D, M d, Y" }}</div>
+                                    <div>Before 11:00 AM</div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <div class="text-muted">Room Type</div>
+                                    <div>{{ ticket.booking.room_type }}</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-muted">Guests</div>
+                                    <div>{{ ticket.booking.guests }} person(s)</div>
+                                </div>
+                            </div>
+                        {% elif ticket.booking_type == 'TRANSPORTATION' %}
+                            <!-- Transportation Booking Details -->
+                            <h4>{{ ticket.booking.transportation.get_type_display }} - {{ ticket.booking.transportation.provider }}</h4>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-5">
+                                    <div class="text-muted">From</div>
+                                    <div class="fw-bold">{{ ticket.booking.transportation.departure_location }}</div>
+                                    <div>{{ ticket.booking.transportation.departure_time|date:"D, M d, Y H:i" }}</div>
+                                </div>
+                                <div class="col-md-2 text-center d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-arrow-right"></i>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="text-muted">To</div>
+                                    <div class="fw-bold">{{ ticket.booking.transportation.arrival_location }}</div>
+                                    <div>{{ ticket.booking.transportation.arrival_time|date:"D, M d, Y H:i" }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="text-muted">Passenger(s)</div>
+                                <div>{{ ticket.booking.passenger_names }}</div>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <div class="text-muted">Booking Date</div>
+                            <div>{{ ticket.booking.created_at|date:"F d, Y H:i" }}</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="text-muted">Payment Status</div>
+                            <div><span class="badge bg-success">Paid</span> - {{ ticket.booking.payment_transaction.amount|floatformat:2 }} USD</div>
+                        </div>
+                        
+                        {% if special_instructions %}
+                        <div class="mb-3">
+                            <div class="text-muted">Special Instructions</div>
+                            <div>{{ ticket.booking.special_requests }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-4 text-center">
+                        <div class="ticket-qr mb-2">
+                            <img src="{{ ticket.qr_code_url }}" alt="QR Code" class="img-fluid" onerror="this.src='https://via.placeholder.com/150x150?text=QR+Code'">
+                        </div>
+                        <div class="small text-muted">Scan for verification</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ticket-footer">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="small">
+                            <strong>Smart Travel, Inc.</strong> | 123 Travel Street, City, Country
+                            <br>
+                            Email: support@smarttravel.com | Phone: +1-555-TRAVEL
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="fw-bold">E-Ticket #{{ ticket.id }}</div>
+                        <div class="small text-muted">Issue Date: {{ ticket.created_at|date:"F d, Y" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="no-print">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle me-2"></i>Important Information</h5>
+                <ul class="mb-0">
+                    <li>Please present this e-ticket upon arrival.</li>
+                    <li>Identification documents may be required for verification.</li>
+                    <li>For any changes or cancellations, please contact our support team.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

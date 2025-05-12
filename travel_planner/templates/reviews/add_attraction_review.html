@@ -1,0 +1,115 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Review {{ attraction.name }} - Smart Travel{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'destinations:list' %}">Destinations</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'destinations:detail' attraction.destination.id %}">{{ attraction.destination.name }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Review {{ attraction.name }}</li>
+                </ol>
+            </nav>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Review {{ attraction.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0 me-3">
+                                {% if attraction.image %}
+                                <img src="{{ attraction.image.url }}" alt="{{ attraction.name }}" class="img-fluid rounded" style="width: 100px; height: 100px; object-fit: cover;">
+                                {% else %}
+                                <img src="{% static 'img/placeholder_attraction.jpg' %}" alt="{{ attraction.name }}" class="img-fluid rounded" style="width: 100px; height: 100px; object-fit: cover;">
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h5 class="mb-1">{{ attraction.name }}</h5>
+                                <p class="text-muted mb-0">{{ attraction.get_attraction_type_display }} in {{ attraction.destination.name }}</p>
+                                <p class="text-muted mb-0">Admission: {{ attraction.get_admission_fee_display }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.rating.id_for_label }}" class="form-label">{{ form.rating.label }}</label>
+                                {{ form.rating }}
+                                {% if form.rating.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.rating.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.value_for_money.id_for_label }}" class="form-label">{{ form.value_for_money.label }}</label>
+                                {{ form.value_for_money }}
+                                {% if form.value_for_money.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.value_for_money.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.comment.id_for_label }}" class="form-label">{{ form.comment.label }}</label>
+                            {{ form.comment }}
+                            {% if form.comment.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.comment.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Share your thoughts about visiting {{ attraction.name }}. What was your favorite part? What should other travelers know?</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'destinations:detail' attraction.destination.id %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add star rating display
+    document.addEventListener('DOMContentLoaded', function() {
+        const starRatings = document.querySelectorAll('select.form-select');
+        starRatings.forEach(function(select) {
+            select.addEventListener('change', function() {
+                // Update visual stars if needed
+                console.log('Rating changed to: ' + this.value);
+            });
+        });
+    });
+</script>
+{% endblock %} 

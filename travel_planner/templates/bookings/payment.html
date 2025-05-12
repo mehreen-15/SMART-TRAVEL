@@ -1,0 +1,312 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Payment - {{ booking_type }} Booking - Smart Travel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-card {
+        max-width: 550px;
+        margin: 0 auto;
+    }
+    .payment-method-item {
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+    }
+    .payment-method-item:hover {
+        background-color: #f8f9fa;
+    }
+    .payment-method-item.selected {
+        border-color: #0d6efd;
+        background-color: #f0f7ff;
+    }
+    .card-icon {
+        font-size: 1.8rem;
+        margin-right: 12px;
+    }
+    .payment-details {
+        display: none;
+    }
+    .payment-details.active {
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="mb-3">Payment</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'bookings:trip_list' %}">My Trips</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'bookings:trip_detail' trip.id %}">{{ trip.title }}</a></li>
+                    <li class="breadcrumb-item active">Payment for {{ booking_type }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'bookings:trip_detail' trip.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Trip
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card payment-card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Complete Your Payment</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Booking Summary -->
+                    <div class="booking-summary mb-4">
+                        <h5 class="border-bottom pb-2 mb-3">Booking Summary</h5>
+                        
+                        {% if booking_type == 'Hotel' %}
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <p><strong>Hotel:</strong> {{ booking.accommodation.name }}</p>
+                                    <p><strong>Check-in:</strong> {{ booking.check_in_date|date:"M d, Y" }}</p>
+                                    <p><strong>Check-out:</strong> {{ booking.check_out_date|date:"M d, Y" }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Room Type:</strong> {{ booking.room_type }}</p>
+                                    <p><strong>Guests:</strong> {{ booking.guests }}</p>
+                                    <p><strong>Booking Reference:</strong> {{ booking.booking_reference }}</p>
+                                </div>
+                            </div>
+                        {% elif booking_type == 'Transportation' %}
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <p><strong>Type:</strong> {{ booking.transportation.get_type_display }}</p>
+                                    <p><strong>Provider:</strong> {{ booking.transportation.provider }}</p>
+                                    <p><strong>From:</strong> {{ booking.transportation.departure_location }}</p>
+                                    <p><strong>To:</strong> {{ booking.transportation.arrival_location }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Departure:</strong> {{ booking.transportation.departure_time|date:"M d, Y H:i" }}</p>
+                                    <p><strong>Arrival:</strong> {{ booking.transportation.arrival_time|date:"M d, Y H:i" }}</p>
+                                    <p><strong>Booking Reference:</strong> {{ booking.booking_reference }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="bg-light p-3 rounded">
+                            <div class="d-flex justify-content-between">
+                                <span><strong>Total Amount:</strong></span>
+                                <span class="text-primary"><strong>${{ payment_amount }}</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if existing_payments %}
+                        <div class="alert alert-success mb-4">
+                            <h5 class="mb-3"><i class="fas fa-check-circle me-2"></i>Payment Completed</h5>
+                            <div class="card mb-0">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span><strong>Transaction ID:</strong></span>
+                                        <span>{{ existing_payments.0.transaction_id }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span><strong>Date:</strong></span>
+                                        <span>{{ existing_payments.0.created_at|date:"F d, Y H:i" }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span><strong>Payment Method:</strong></span>
+                                        <span>{{ existing_payments.0.get_payment_method_display }}</span>
+                                    </div>
+                                    {% if existing_payments.0.card_last_digits %}
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span><strong>Card:</strong></span>
+                                        <span>**** **** **** {{ existing_payments.0.card_last_digits }}</span>
+                                    </div>
+                                    {% endif %}
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span><strong>Status:</strong></span>
+                                        <span class="badge bg-success">{{ existing_payments.0.get_status_display }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-0">
+                                        <span><strong>Amount:</strong></span>
+                                        <span class="fw-bold">${{ existing_payments.0.amount }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-center">
+                                <a href="{% url 'bookings:trip_detail' trip.id %}" class="btn btn-primary">
+                                    <i class="fas fa-arrow-left me-2"></i>Return to Trip Details
+                                </a>
+                            </div>
+                        </div>
+                        {% else %}
+                        <h5 class="border-bottom pb-2 mb-3">Payment Method</h5>
+                        
+                        <!-- Payment Methods -->
+                        <div class="payment-methods mb-4">
+                            {% for radio in form.payment_method %}
+                            <div class="payment-method-item p-3 rounded mb-2 d-flex align-items-center">
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                </div>
+                                <label for="{{ radio.id_for_label }}" class="ms-2 flex-grow-1 d-flex align-items-center" style="cursor: pointer;">
+                                    <i class="card-icon fas 
+                                        {% if 'credit_card' in radio.choice_value %}fa-credit-card text-primary
+                                        {% elif 'paypal' in radio.choice_value %}fa-paypal text-info
+                                        {% else %}fa-university text-success{% endif %}">
+                                    </i>
+                                    <span>{{ radio.choice_label }}</span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Credit Card Details -->
+                        <div id="credit-card-details" class="payment-details mb-4">
+                            <div class="alert alert-info mb-3">
+                                <h6 class="mb-2"><i class="fas fa-info-circle me-2"></i>Demo Mode: Test Card Details</h6>
+                                <small>You can use the following test card details for demonstration:</small>
+                                <div class="mt-2 small">
+                                    <div><strong>Card Number:</strong> 4242 4242 4242 4242</div>
+                                    <div><strong>Expiry Date:</strong> Any future date (e.g., 12/25)</div>
+                                    <div><strong>CVV:</strong> Any 3 digits (e.g., 123)</div>
+                                    <div><strong>Name:</strong> Any name</div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="{{ form.card_number.id_for_label }}" class="form-label">Card Number</label>
+                                    {{ form.card_number }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.expiry_date.id_for_label }}" class="form-label">Expiry Date (MM/YY)</label>
+                                    {{ form.expiry_date }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.cvv.id_for_label }}" class="form-label">CVV</label>
+                                    {{ form.cvv }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="{{ form.cardholder_name.id_for_label }}" class="form-label">Cardholder Name</label>
+                                    {{ form.cardholder_name }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- PayPal Details -->
+                        <div id="paypal-details" class="payment-details mb-4">
+                            <div class="alert alert-info">
+                                <h6 class="mb-2"><i class="fas fa-info-circle me-2"></i>Demo Mode: PayPal</h6>
+                                <p>In a real application, you would be redirected to PayPal to complete your payment.</p>
+                                <p>For this demo, clicking the "Pay Now" button will simulate a successful PayPal payment.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Bank Transfer Details -->
+                        <div id="bank-transfer-details" class="payment-details mb-4">
+                            <div class="alert alert-info">
+                                <h6 class="mb-2"><i class="fas fa-info-circle me-2"></i>Demo Mode: Bank Transfer</h6>
+                                <p>Please use the following simulated bank details:</p>
+                                <p><strong>Bank:</strong> Smart Travel Bank</p>
+                                <p><strong>Account Name:</strong> Smart Travel Inc</p>
+                                <p><strong>Account Number:</strong> 12345678</p>
+                                <p><strong>Reference:</strong> {{ booking.booking_reference }}</p>
+                                <p class="mb-0 mt-2"><small>For this demo, clicking the "Pay Now" button will simulate a successful bank transfer.</small></p>
+                            </div>
+                        </div>
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                            <label class="form-check-label" for="termsCheck">
+                                I agree to the <a href="#" target="_blank">terms and conditions</a> and <a href="#" target="_blank">cancellation policy</a>.
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-lock me-2"></i>Pay Now ${{ payment_amount }}
+                            </button>
+                            <a href="{% url 'bookings:trip_detail' trip.id %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <small class="text-muted">Your payment is secured with SSL encryption. We do not store your card details.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle payment method selection
+        const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+        const paymentMethodItems = document.querySelectorAll('.payment-method-item');
+        const creditCardDetails = document.getElementById('credit-card-details');
+        const paypalDetails = document.getElementById('paypal-details');
+        const bankTransferDetails = document.getElementById('bank-transfer-details');
+        
+        function updatePaymentDetails() {
+            const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+            
+            // Update selected styles
+            paymentMethodItems.forEach(item => {
+                if (item.querySelector(`input[value="${selectedMethod}"]`)) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+            
+            // Show appropriate details
+            creditCardDetails.classList.remove('active');
+            paypalDetails.classList.remove('active');
+            bankTransferDetails.classList.remove('active');
+            
+            if (selectedMethod === 'credit_card') {
+                creditCardDetails.classList.add('active');
+            } else if (selectedMethod === 'paypal') {
+                paypalDetails.classList.add('active');
+            } else if (selectedMethod === 'bank_transfer') {
+                bankTransferDetails.classList.add('active');
+            }
+        }
+        
+        // Add click event to payment method items
+        paymentMethodItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+                updatePaymentDetails();
+            });
+        });
+        
+        // Add change event to radio buttons
+        paymentMethods.forEach(method => {
+            method.addEventListener('change', updatePaymentDetails);
+        });
+        
+        // Initialize display
+        updatePaymentDetails();
+    });
+</script>
+{% endblock %} 
