@@ -20,7 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from . import views
-from .admin import admin_site  # Import our custom admin site
+from .admin_config import admin_site  # Import the configured admin site
 from . import api
 from django.views.generic.base import RedirectView
 

@@ -7,7 +7,8 @@
 <style>
     /* Hero Section Styles */
     .hero-parallax {
-        height: 90vh;
+        min-height: 90vh;
+        height: auto;
         background-image: url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=2000');
         background-attachment: fixed;
         background-position: center;
@@ -16,6 +17,39 @@
         position: relative;
         margin-bottom: 3rem;
         overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-parallax {
+            min-height: 100vh;
+            background-attachment: scroll;
+        }
+        
+        .hero-title {
+            font-size: 3rem !important;
+        }
+        
+        .hero-text {
+            font-size: 1.2rem !important;
+        }
+    }
+    
+    @media (min-width: 1200px) {
+        .hero-parallax {
+            min-height: 100vh;
+        }
+        
+        .hero-title {
+            font-size: 5rem !important;
+        }
+        
+        .hero-text {
+            font-size: 1.8rem !important;
+            max-width: 800px !important;
+        }
     }
     
     .hero-overlay {
@@ -31,13 +65,13 @@
     .hero-content {
         position: relative;
         z-index: 2;
-        height: 100%;
+        width: 100%;
+        padding: 5% 20px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         text-align: center;
-        padding: 0 20px;
     }
     
     .hero-title {
@@ -379,7 +413,7 @@
         <p class="hero-text">Personalized travel experiences tailored to your style, budget, and dreams</p>
         <div class="hero-buttons">
             <a href="{% url 'destinations:list' %}" class="btn hero-btn hero-btn-primary">Explore Destinations</a>
-            <a href="/trips/create/" class="btn hero-btn hero-btn-outline">Plan Your Trip</a>
+            <a href="{% url 'bookings:create_trip' %}" class="btn hero-btn hero-btn-outline">Plan Your Trip</a>
         </div>
     </div>
 </section>

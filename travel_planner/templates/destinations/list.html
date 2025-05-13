@@ -4,6 +4,69 @@
 
 {% block title %}Explore Destinations - Smart Travel{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Custom styles for destination cards */
+    .destination-card {
+        transition: all 0.3s ease;
+        border: none;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    
+    .destination-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    
+    .card-img-container {
+        height: 250px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .card-img-top {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .destination-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    
+    .card-img-overlay {
+        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%);
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .destination-card:hover .card-img-overlay {
+        opacity: 1;
+    }
+    
+    .card-img-overlay h5 {
+        color: white;
+        margin-bottom: 0;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    }
+    
+    /* Search suggestions styles */
+    .search-container {
+        margin-bottom: 1.5rem;
+    }
+    
+    .suggestion-item:hover {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     <!-- Search Bar -->
@@ -100,12 +163,17 @@
     <div class="row">
         {% for destination in destinations %}
         <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                {% if destination.image %}
-                <img src="{{ destination.image.url }}" class="card-img-top" alt="{{ destination.name }}" style="height: 220px; object-fit: cover;">
-                {% else %}
-                <img src="{{ destination.image_url }}" class="card-img-top" alt="{{ destination.name }}" style="height: 220px; object-fit: cover;">
-                {% endif %}
+            <div class="card destination-card h-100">
+                <div class="card-img-container">
+                    {% if destination.image %}
+                    <img src="{{ destination.image.url }}" class="card-img-top" alt="{{ destination.name }}">
+                    {% else %}
+                    <img src="{{ destination.image_url }}" class="card-img-top" alt="{{ destination.name }}">
+                    {% endif %}
+                    <div class="card-img-overlay">
+                        <h5 class="card-title">{{ destination.name }}</h5>
+                    </div>
+                </div>
                 <div class="card-body">
                     <h5 class="card-title">{{ destination.name }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ destination.city }}, {{ destination.country }}</h6>

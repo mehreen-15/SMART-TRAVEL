@@ -16,6 +16,9 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Ensure logs directory exists
+logs_dir = os.path.join(BASE_DIR, 'logs')
+os.makedirs(logs_dir, exist_ok=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -44,9 +47,9 @@ INSTALLED_APPS = [
     'bookings',
     'reviews',
     'travel_planner',
-    # Third-party apps for real-time functionality
+    # Third-party apps
     'channels',
-    'django_eventstream',
+    # Removed third-party apps for real-time functionality
 ]
 
 MIDDLEWARE = [
@@ -80,14 +83,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'travel_planner.wsgi.application'
-ASGI_APPLICATION = 'travel_planner.routing.application'
-
-# Channel layers for real-time functionality
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    },
-}
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -106,7 +101,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'travel_planner',
         'USER': 'postgres',
-        'PASSWORD': '12345',
+        'PASSWORD': 'bano',
         'HOST': 'localhost',
         'PORT': '5432',
         'CONN_MAX_AGE': 60,      # Keep connections alive for 60 seconds
@@ -193,9 +188,11 @@ LOGGING = {
         },
         'db_file': {
             'level': 'WARNING',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'logs/db_performance.log'),
             'formatter': 'db_performance',
+            'maxBytes': 1024*1024*5,  # 5MB
+            'backupCount': 3,
         },
         'user_activity_file': {
             'level': 'INFO',
@@ -220,5 +217,12 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+    },
+}
+
+# Channel layers for WebSocket communication
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }

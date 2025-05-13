@@ -1,0 +1,16 @@
+[
+  {
+    "model": "destinations.destination",
+    "pk": 8,
+    "fields": {
+      "name": "Akrotiri Archaeological Site",
+      "country": "Greece",
+      "city": "Santorini",
+      "description": "Akrotiri is a Minoan Bronze Age settlement on the volcanic Greek island of Santorini (Thera). The settlement was destroyed in the Theran eruption sometime in the 16th century BC and buried in volcanic ash, which preserved the remains of fine frescoes and many objects and artworks.",
+      "image": "destinations/akrotiri.jpg",
+      "avg_temperature": 23.0,
+      "best_time_to_visit": "April to May, September to October",
+      "popularity_score": 8.7
+    }
+  }
+] 

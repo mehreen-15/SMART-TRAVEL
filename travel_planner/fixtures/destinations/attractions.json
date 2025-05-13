@@ -1,0 +1,54 @@
+[
+  {
+    "model": "destinations.attraction",
+    "pk": 13,
+    "fields": {
+      "destination": 5,
+      "name": "Notre-Dame Cathedral",
+      "category": "history",
+      "description": "Notre-Dame Cathedral is a medieval Catholic cathedral on the Île de la Cité in Paris, France. The cathedral is widely considered to be one of the finest examples of French Gothic architecture.",
+      "entrance_fee": 0.00,
+      "opening_hours": "Currently closed for reconstruction after the 2019 fire. Exterior viewing only.",
+      "image": "attractions/notre_dame.jpg"
+    }
+  },
+  {
+    "model": "destinations.attraction",
+    "pk": 14,
+    "fields": {
+      "destination": 8,
+      "name": "Akrotiri Archaeological Site",
+      "category": "history",
+      "description": "Akrotiri is a Minoan Bronze Age settlement on the volcanic Greek island of Santorini (Thera). The settlement was destroyed in the Theran eruption sometime in the 16th century BC and buried in volcanic ash, which preserved the remains of fine frescoes and many objects and artworks.",
+      "entrance_fee": 12.00,
+      "opening_hours": "8:00 AM - 5:00 PM, Tuesday to Sunday. Closed on Mondays.",
+      "image": "attractions/akrotiri.jpg"
+    }
+  },
+  {
+    "model": "destinations.attraction",
+    "pk": 15,
+    "fields": {
+      "destination": 6,
+      "name": "Arashiyama Bamboo Grove",
+      "category": "nature",
+      "description": "The Arashiyama Bamboo Grove is one of Kyoto's top attractions and for good reason: standing amid these soaring stalks of bamboo is like being in another world.",
+      "entrance_fee": 0.00,
+      "opening_hours": "Open 24 hours",
+      "image": "attractions/arashiyama_bamboo_grove.jpg"
+    }
+  },
+  {
+    "model": "destinations.attraction",
+    "pk": 16,
+    "fields": {
+      "destination": 7,
+      "name": "Kinkaku-ji (Golden Pavilion)",
+      "category": "culture",
+      "description": "Kinkaku-ji, officially named Rokuon-ji, is a Zen Buddhist temple in Kyoto, Japan. The top two floors of the pavilion are covered with pure gold leaf, creating a stunning reflection on the pond below.",
+      "entrance_fee": 5.00,
+      "opening_hours": "9:00 AM - 5:00 PM, Daily",
+      "image": "attractions/kinkakuji.jpg"
+    }
+  }
+] 

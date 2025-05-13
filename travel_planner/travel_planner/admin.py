@@ -5,6 +5,7 @@ from django.db.models import Count, Sum
 from django.utils.html import format_html
 from django.db import connection
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
 
 # Import your models
 from users.models import UserProfile, TravelPreference

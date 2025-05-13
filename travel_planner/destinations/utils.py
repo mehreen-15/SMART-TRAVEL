@@ -21,7 +21,10 @@ def get_destination_image_url(destination):
         2: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",  # Santorini
         3: "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",  # Grand Canyon
         4: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",  # Kyoto
-        5: "https://images.unsplash.com/photo-1526392060635-9d6019884377?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",  # Machu Picchu
+        5: "https://images.unsplash.com/photo-1478391679764-b2d8b3cd1e94?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",  # Notre-Dame
+        6: "https://images.unsplash.com/photo-1607619662634-3ac55ec0e216?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",  # Arashiyama
+        7: "https://images.unsplash.com/photo-1624299831638-82c15fcafd2b?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",  # Kinkaku-ji
+        8: "https://images.unsplash.com/photo-1530841377377-3ff06c0ca713?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",  # Akrotiri
     }
     
     # Return specific image if we have one for this destination id
@@ -64,9 +67,12 @@ def get_attraction_image_url(attraction):
         "Desert View Watchtower": "https://images.unsplash.com/photo-1605558774122-3991814ae0dd?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",
         "South Kaibab Trail": "https://images.unsplash.com/photo-1537104780844-0a367d952c4a?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",
         "Kinkaku-ji Temple": "https://images.unsplash.com/photo-1598018553943-89dc869bf90d?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",
-        "Arashiyama Bamboo Grove": "https://images.unsplash.com/photo-1503899036084-686acb2f646e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",
+        "Kinkaku-ji (Golden Pavilion)": "https://images.unsplash.com/photo-1624299831638-82c15fcafd2b?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",
+        "Arashiyama Bamboo Grove": "https://images.unsplash.com/photo-1607619662634-3ac55ec0e216?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",
         "Eiffel Tower": "https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",
+        "Notre-Dame Cathedral": "https://images.unsplash.com/photo-1478391679764-b2d8b3cd1e94?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",
         "Acropolis": "https://images.unsplash.com/photo-1555993539-1732b0258235?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",
+        "Akrotiri Archaeological Site": "https://images.unsplash.com/photo-1530841377377-3ff06c0ca713?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",
         "Santorini Museum": "https://images.unsplash.com/photo-1530841377377-3ff06c0ca713?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",
         "Museum of Prehistoric Thera": "https://images.unsplash.com/photo-1530841377377-3ff06c0ca713?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",
         "Archaeological Museum of Thera": "https://images.unsplash.com/photo-1530841377377-3ff06c0ca713?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200",

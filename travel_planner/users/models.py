@@ -36,3 +36,17 @@ class TravelPreference(models.Model):
     
     def __str__(self):
         return f"{self.user.username}'s Travel Preferences"
+
+class UserActivity(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    action = models.CharField(max_length=100)
+    page_visited = models.CharField(max_length=255, blank=True, null=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    duration = models.FloatField(blank=True, null=True)  # Duration in seconds
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.action} - {self.timestamp}"
+    
+    class Meta:
+        verbose_name_plural = "User Activities"

@@ -1,0 +1,58 @@
+[
+  {
+    "model": "destinations.accommodation",
+    "pk": 13,
+    "fields": {
+      "destination": 5,
+      "name": "Hotel Notre-Dame Saint Michel",
+      "type": "hotel",
+      "address": "1 Quai Saint-Michel, 75005 Paris, France",
+      "price_per_night": 220.00,
+      "rating": 4.5,
+      "amenities": "Free WiFi, Air conditioning, 24-hour front desk, Non-smoking rooms, Elevator",
+      "image": "accommodations/hotel_notre_dame.jpg"
+    }
+  },
+  {
+    "model": "destinations.accommodation",
+    "pk": 14,
+    "fields": {
+      "destination": 8,
+      "name": "Akrotiri Hotel",
+      "type": "hotel",
+      "address": "Akrotiri, Santorini 84700, Greece",
+      "price_per_night": 180.00,
+      "rating": 4.3,
+      "amenities": "Swimming pool, Free WiFi, Breakfast included, Sea view, Air conditioning",
+      "image": "accommodations/akrotiri_hotel.jpg"
+    }
+  },
+  {
+    "model": "destinations.accommodation",
+    "pk": 15,
+    "fields": {
+      "destination": 6,
+      "name": "Arashiyama Benkei",
+      "type": "ryokan",
+      "address": "17 Sagatenryuji Susukinobabacho, Ukyo Ward, Kyoto 616-8385, Japan",
+      "price_per_night": 350.00,
+      "rating": 4.8,
+      "amenities": "Hot spring bath, Traditional Japanese meals, Garden view, Free WiFi, Yukata provided",
+      "image": "accommodations/arashiyama_ryokan.jpg"
+    }
+  },
+  {
+    "model": "destinations.accommodation",
+    "pk": 16,
+    "fields": {
+      "destination": 7,
+      "name": "The Ritz-Carlton Kyoto",
+      "type": "hotel",
+      "address": "Kamogawa Nijo-Ohashi Hotori, Nakagyo-ku, Kyoto 604-0902, Japan",
+      "price_per_night": 550.00,
+      "rating": 4.9,
+      "amenities": "Luxury spa, Indoor pool, Fine dining, River view, Concierge service",
+      "image": "accommodations/ritz_carlton_kyoto.jpg"
+    }
+  }
+] 

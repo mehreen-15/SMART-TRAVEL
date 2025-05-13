@@ -1,0 +1,100 @@
+[
+  {
+    "model": "destinations.destination",
+    "pk": 1,
+    "fields": {
+      "name": "Eiffel Tower",
+      "country": "France",
+      "city": "Paris",
+      "description": "The Eiffel Tower is a wrought-iron lattice tower on the Champ de Mars in Paris, France. It is named after the engineer Gustave Eiffel, whose company designed and built the tower.",
+      "image": "destinations/eiffel_tower.jpg",
+      "avg_temperature": 15.5,
+      "best_time_to_visit": "April to June, September to October",
+      "popularity_score": 9.8
+    }
+  },
+  {
+    "model": "destinations.destination",
+    "pk": 2,
+    "fields": {
+      "name": "Santorini",
+      "country": "Greece",
+      "city": "Santorini",
+      "description": "Santorini is one of the Cyclades islands in the Aegean Sea. It was devastated by a volcanic eruption in the 16th century BC, forever shaping its rugged landscape.",
+      "image": "destinations/santorini.jpg",
+      "avg_temperature": 23.0,
+      "best_time_to_visit": "April to May, September to October",
+      "popularity_score": 9.5
+    }
+  },
+  {
+    "model": "destinations.destination",
+    "pk": 3,
+    "fields": {
+      "name": "Grand Canyon",
+      "country": "USA",
+      "city": "Arizona",
+      "description": "The Grand Canyon is a steep-sided canyon carved by the Colorado River in Arizona, United States. The Grand Canyon is 277 miles long, up to 18 miles wide and attains a depth of over a mile.",
+      "image": "destinations/grand_canyon.jpg",
+      "avg_temperature": 18.0,
+      "best_time_to_visit": "March to May, September to November",
+      "popularity_score": 9.2
+    }
+  },
+  {
+    "model": "destinations.destination",
+    "pk": 4,
+    "fields": {
+      "name": "Kyoto",
+      "country": "Japan",
+      "city": "Kyoto",
+      "description": "Kyoto, once the capital of Japan, is a city on the island of Honshu. It's famous for its numerous classical Buddhist temples, gardens, imperial palaces, Shinto shrines and traditional wooden houses.",
+      "image": "destinations/kyoto.jpg",
+      "avg_temperature": 16.0,
+      "best_time_to_visit": "March to May, September to November",
+      "popularity_score": 9.0
+    }
+  },
+  {
+    "model": "destinations.destination",
+    "pk": 5,
+    "fields": {
+      "name": "Notre-Dame Cathedral",
+      "country": "France",
+      "city": "Paris",
+      "description": "Notre-Dame Cathedral is a medieval Catholic cathedral on the Île de la Cité in Paris, France. The cathedral is widely considered to be one of the finest examples of French Gothic architecture.",
+      "image": "destinations/notre_dame.jpg",
+      "avg_temperature": 15.5,
+      "best_time_to_visit": "April to June, September to October",
+      "popularity_score": 9.3
+    }
+  },
+  {
+    "model": "destinations.destination",
+    "pk": 6,
+    "fields": {
+      "name": "Arashiyama Bamboo Grove",
+      "country": "Japan",
+      "city": "Kyoto",
+      "description": "The Arashiyama Bamboo Grove is one of Kyoto's top attractions and for good reason: standing amid these soaring stalks of bamboo is like being in another world.",
+      "image": "destinations/arashiyama_bamboo_grove.jpg",
+      "avg_temperature": 16.0,
+      "best_time_to_visit": "March to May, September to November",
+      "popularity_score": 8.9
+    }
+  },
+  {
+    "model": "destinations.destination",
+    "pk": 7,
+    "fields": {
+      "name": "Kinkaku-ji (Golden Pavilion)",
+      "country": "Japan",
+      "city": "Kyoto",
+      "description": "Kinkaku-ji, officially named Rokuon-ji, is a Zen Buddhist temple in Kyoto, Japan. The top two floors of the pavilion are covered with pure gold leaf, creating a stunning reflection on the pond below.",
+      "image": "destinations/kinkakuji.jpg",
+      "avg_temperature": 16.0,
+      "best_time_to_visit": "March to May, September to November",
+      "popularity_score": 9.2
+    }
+  }
+] 
