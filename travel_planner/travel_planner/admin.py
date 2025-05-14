@@ -6,7 +6,11 @@ from django.utils.html import format_html
 from django.db import connection
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
-from django.urls import reverse
+from django.urls import reverse, NoReverseMatch
+import logging
+
+# Set up logger
+logger = logging.getLogger(__name__)
 
 # Import your models
 from users.models import UserProfile, TravelPreference
@@ -39,6 +43,20 @@ class TravelPlannerAdminSite(AdminSite):
             app['models'].sort(key=lambda x: x['name'])
             
         return app_list
+    
+    def get_model_url(self, model_url_name):
+        """
+        Helper method to safely get admin URL for a model.
+        Falls back to admin index if the URL cannot be resolved.
+        """
+        try:
+            return reverse(f'admin:{model_url_name}')
+        except NoReverseMatch:
+            logger.warning(f"Could not resolve admin URL for {model_url_name}")
+            try:
+                return reverse('admin:index')
+            except NoReverseMatch:
+                return '/admin/'
     
     def index(self, request, extra_context=None):
         """
@@ -76,63 +94,80 @@ class TravelPlannerAdminSite(AdminSite):
         # Get database performance statistics
         db_stats = self.get_database_stats()
         
-        # Generate quick links using dynamic URL generation instead of hardcoded paths
-        quick_links = [
+        # Define the quick links with error handling
+        quick_link_configs = [
             {
                 'name': 'Users',
-                'link': reverse('admin:auth_user_changelist'),
+                'url_name': 'auth_user_changelist',
                 'icon': 'fas fa-users',
                 'color': '#1976d2'  # Primary blue
             },
             {
                 'name': 'Destinations',
-                'link': reverse('admin:destinations_destination_changelist'),
+                'url_name': 'destinations_destination_changelist',
                 'icon': 'fas fa-map-marker-alt',
                 'color': '#28a745'  # Success green
             },
             {
                 'name': 'Trips',
-                'link': reverse('admin:bookings_trip_changelist'),
+                'url_name': 'bookings_trip_changelist',
                 'icon': 'fas fa-suitcase',
                 'color': '#6f42c1'  # Purple
             },
             {
                 'name': 'Hotel Bookings',
-                'link': reverse('admin:bookings_hotelbooking_changelist'),
+                'url_name': 'bookings_hotelbooking_changelist',
                 'icon': 'fas fa-hotel',
                 'color': '#fd7e14'  # Orange
             },
             {
                 'name': 'Transportation',
-                'link': reverse('admin:bookings_transportation_changelist'),
+                'url_name': 'bookings_transportation_changelist',
                 'icon': 'fas fa-plane',
                 'color': '#e83e8c'  # Pink
             },
             {
                 'name': 'Payments',
-                'link': reverse('admin:bookings_paymenttransaction_changelist'),
+                'url_name': 'bookings_paymenttransaction_changelist',
                 'icon': 'fas fa-credit-card',
                 'color': '#20c997'  # Teal
             },
             {
                 'name': 'E-Tickets',
-                'link': reverse('admin:bookings_eticket_changelist'),
+                'url_name': 'bookings_eticket_changelist',
                 'icon': 'fas fa-ticket-alt',
                 'color': '#fd7e14'  # Orange
             },
             {
                 'name': 'Attractions',
-                'link': reverse('admin:destinations_attraction_changelist'),
+                'url_name': 'destinations_attraction_changelist',
                 'icon': 'fas fa-landmark',
                 'color': '#17a2b8'  # Info blue
             },
             {
                 'name': 'Database Stats',
-                'link': reverse('admin:travel_planner_databasestatus_changelist'),
+                'url_name': 'travel_planner_databasestatus_changelist',
                 'icon': 'fas fa-database',
                 'color': '#6c757d'  # Secondary gray
             }
         ]
+        
+        # Generate quick links using dynamic URL generation with error handling
+        quick_links = []
+        for config in quick_link_configs:
+            try:
+                link = reverse(f'admin:{config["url_name"]}')
+            except NoReverseMatch:
+                logger.warning(f"Could not resolve admin URL for {config['url_name']}")
+                # Fallback to a basic URL pattern
+                link = f"/admin/{config['url_name'].replace('_changelist', '').replace('_', '/')}"
+            
+            quick_links.append({
+                'name': config['name'],
+                'link': link,
+                'icon': config['icon'],
+                'color': config['color']
+            })
         
         context = {
             'stats': stats,
