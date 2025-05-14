@@ -8,6 +8,8 @@ from asgiref.sync import async_to_sync
 import json
 import re
 import logging
+import uuid
+from .models import DatabaseConnectionLog
 
 logger = logging.getLogger('db_performance')
 
@@ -170,3 +172,114 @@ class DatabasePerformanceMiddleware:
                             logger.warning(f"Slow query #{i}: {q_time:.3f}s - {query.get('sql', '')}")
         
         return response 
+
+class DatabaseMetricsMiddleware:
+    """
+    Middleware to track database connection metrics and log them
+    to help identify performance issues and monitor database health.
+    """
+    
+    def __init__(self, get_response):
+        self.get_response = get_response
+    
+    def __call__(self, request):
+        # Generate a unique ID for this connection
+        connection_id = str(uuid.uuid4())
+        
+        # Record the start time
+        start_time = time.time()
+        
+        # Get initial query count
+        initial_query_count = len(connection.queries)
+        
+        # Process the request
+        response = self.get_response(request)
+        
+        # Skip API and static/media requests
+        if request.path.startswith('/api/') or request.path.startswith('/static/') or request.path.startswith('/media/'):
+            return response
+        
+        try:
+            # Calculate metrics after the response
+            end_time = time.time()
+            duration_ms = (end_time - start_time) * 1000
+            
+            # Only log if DEBUG is True (to capture queries) or if we're in the admin
+            if request.path.startswith('/admin/'):
+                with connection.cursor() as cursor:
+                    # Get SQLite configuration at this point
+                    try:
+                        cursor.execute("PRAGMA journal_mode;")
+                        journal_mode = cursor.fetchone()[0]
+                    except Exception:
+                        journal_mode = "unknown"
+                        
+                    try:
+                        cursor.execute("PRAGMA page_size;")
+                        page_size = cursor.fetchone()[0]
+                    except Exception:
+                        page_size = 0
+                        
+                    try:
+                        cursor.execute("PRAGMA cache_size;")
+                        cache_size = cursor.fetchone()[0]
+                    except Exception:
+                        cache_size = 0
+                        
+                    try:
+                        cursor.execute("SELECT sqlite_version();")
+                        sqlite_version = cursor.fetchone()[0]
+                    except Exception:
+                        sqlite_version = "unknown"
+                
+                # Get query information
+                queries = connection.queries
+                query_count = len(queries) - initial_query_count
+                
+                # Extract tables accessed (basic implementation)
+                tables_accessed = set()
+                for query in queries[initial_query_count:]:
+                    sql = query.get('sql', '').lower()
+                    # Very basic SQL parsing to extract table names
+                    for keyword in ['from ', 'join ', 'update ', 'insert into ']:
+                        if keyword in sql:
+                            parts = sql.split(keyword)[1].strip().split()
+                            if parts:
+                                table = parts[0].strip('";,()').split('.')[-1]
+                                tables_accessed.add(table)
+                
+                # Create the log entry
+                DatabaseConnectionLog.objects.create(
+                    connection_id=connection_id,
+                    ip_address=self.get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', 'Unknown'),
+                    query_count=query_count,
+                    query_time_ms=duration_ms,
+                    tables_accessed=', '.join(tables_accessed),
+                    journal_mode=journal_mode,
+                    page_size=page_size,
+                    cache_size=cache_size,
+                    sqlite_version=sqlite_version,
+                    connection_duration=duration_ms
+                )
+                
+                # Log slow queries (over 500ms)
+                if duration_ms > 500:
+                    logger.warning(f"Slow request: {request.path} took {duration_ms:.2f}ms with {query_count} queries")
+        
+        except Exception as e:
+            # Don't let metrics collection break the site
+            logger.error(f"Error in DatabaseMetricsMiddleware: {str(e)}")
+        
+        return response
+    
+    def get_client_ip(self, request):
+        """
+        Get the client IP address from the request
+        """
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR', 'unknown')
+        return ip 
