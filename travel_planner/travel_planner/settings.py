@@ -62,6 +62,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'users.middleware.UserActivityMiddleware',
     'travel_planner.middleware.DatabasePerformanceMiddleware',
+    'travel_planner.middleware.DatabaseMetricsMiddleware',
 ]
 
 ROOT_URLCONF = 'travel_planner.urls'
