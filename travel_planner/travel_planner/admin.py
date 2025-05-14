@@ -296,6 +296,10 @@ class TravelPlannerAdminSite(AdminSite):
                 cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table';")
                 table_count = cursor.fetchone()[0]
                 
+                # Get index count
+                cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='index';")
+                index_count = cursor.fetchone()[0]
+                
                 # Get database size
                 cursor.execute("PRAGMA page_count;")
                 page_count = cursor.fetchone()[0]
@@ -313,15 +317,22 @@ class TravelPlannerAdminSite(AdminSite):
                 cursor.execute("PRAGMA cache_size;")
                 cache_size = cursor.fetchone()[0]
                 
-                # Get query statistics
-                cursor.execute("PRAGMA query_stats;")
-                query_stats = cursor.fetchone()
-                queries_executed = query_stats[0] if query_stats else 'N/A'
+                # Get query statistics if available
+                queries_executed = 'N/A'
+                try:
+                    cursor.execute("PRAGMA query_stats;")
+                    query_stats = cursor.fetchone()
+                    if query_stats:
+                        queries_executed = query_stats[0]
+                except Exception as e:
+                    logger.warning(f"Could not get query stats: {str(e)}")
+                
+                # Get integrity check (limited to avoid long operations)
+                cursor.execute("PRAGMA quick_check;")
+                integrity = cursor.fetchone()[0]
                 
                 # Get performance recommendations
                 recommendations = []
-                cursor.execute("PRAGMA integrity_check;")
-                integrity = cursor.fetchone()[0]
                 if integrity != 'ok':
                     recommendations.append("Database integrity issues detected")
                 
@@ -331,19 +342,35 @@ class TravelPlannerAdminSite(AdminSite):
                 if synchronous > 1:
                     recommendations.append("Consider reducing synchronous level for better performance")
                 
+                if isinstance(cache_size, int) and cache_size < 2000:
+                    recommendations.append("Consider increasing cache size for better performance")
+                
+                # Check for indexes on commonly queried tables
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('auth_user', 'bookings_trip', 'destinations_destination');")
+                common_tables = [row[0] for row in cursor.fetchall()]
+                
+                for table in common_tables:
+                    cursor.execute(f"PRAGMA index_list({table});")
+                    indexes = cursor.fetchall()
+                    if len(indexes) < 2:  # Assuming at least 2 indexes are useful
+                        recommendations.append(f"Consider adding indexes to '{table}' table")
+                
                 return {
                     'engine': 'SQLite',
                     'version': version,
                     'tables': table_count,
+                    'indexes': index_count,
                     'size_mb': size_mb,
                     'journal_mode': journal_mode,
                     'synchronous': synchronous,
                     'cache_size': cache_size,
                     'queries_executed': queries_executed,
+                    'integrity': integrity,
                     'recommendations': recommendations,
                     'connection_string': 'sqlite:///' + str(connection.settings_dict['NAME'])
                 }
         except Exception as e:
+            logger.error(f"Error getting database stats: {str(e)}")
             return {
                 'engine': 'SQLite',
                 'error': str(e),
