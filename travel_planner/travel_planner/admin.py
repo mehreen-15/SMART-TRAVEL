@@ -6,6 +6,7 @@ from django.utils.html import format_html
 from django.db import connection
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.urls import reverse
 
 # Import your models
 from users.models import UserProfile, TravelPreference
@@ -75,59 +76,59 @@ class TravelPlannerAdminSite(AdminSite):
         # Get database performance statistics
         db_stats = self.get_database_stats()
         
-        # Generate quick links using direct paths rather than URL reversals
+        # Generate quick links using dynamic URL generation instead of hardcoded paths
         quick_links = [
             {
                 'name': 'Users',
-                'link': '/admin/auth/user/',
+                'link': reverse('admin:auth_user_changelist'),
                 'icon': 'fas fa-users',
                 'color': '#1976d2'  # Primary blue
             },
             {
                 'name': 'Destinations',
-                'link': '/admin/destinations/destination/',
+                'link': reverse('admin:destinations_destination_changelist'),
                 'icon': 'fas fa-map-marker-alt',
                 'color': '#28a745'  # Success green
             },
             {
                 'name': 'Trips',
-                'link': '/admin/bookings/trip/',
+                'link': reverse('admin:bookings_trip_changelist'),
                 'icon': 'fas fa-suitcase',
                 'color': '#6f42c1'  # Purple
             },
             {
                 'name': 'Hotel Bookings',
-                'link': '/admin/bookings/hotelbooking/',
+                'link': reverse('admin:bookings_hotelbooking_changelist'),
                 'icon': 'fas fa-hotel',
                 'color': '#fd7e14'  # Orange
             },
             {
                 'name': 'Transportation',
-                'link': '/admin/bookings/transportation/',
+                'link': reverse('admin:bookings_transportation_changelist'),
                 'icon': 'fas fa-plane',
                 'color': '#e83e8c'  # Pink
             },
             {
                 'name': 'Payments',
-                'link': '/admin/bookings/paymenttransaction/',
+                'link': reverse('admin:bookings_paymenttransaction_changelist'),
                 'icon': 'fas fa-credit-card',
                 'color': '#20c997'  # Teal
             },
             {
                 'name': 'E-Tickets',
-                'link': '/admin/bookings/eticket/',
+                'link': reverse('admin:bookings_eticket_changelist'),
                 'icon': 'fas fa-ticket-alt',
                 'color': '#fd7e14'  # Orange
             },
             {
                 'name': 'Attractions',
-                'link': '/admin/destinations/attraction/',
+                'link': reverse('admin:destinations_attraction_changelist'),
                 'icon': 'fas fa-landmark',
                 'color': '#17a2b8'  # Info blue
             },
             {
                 'name': 'Database Stats',
-                'link': '/admin/travel_planner/databasestatus/',
+                'link': reverse('admin:travel_planner_databasestatus_changelist'),
                 'icon': 'fas fa-database',
                 'color': '#6c757d'  # Secondary gray
             }
